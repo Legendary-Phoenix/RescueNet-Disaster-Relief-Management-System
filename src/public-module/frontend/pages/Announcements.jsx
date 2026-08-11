@@ -1,14 +1,6 @@
-import { useState, useEffect } from 'react';
-import './Announcements.css';
-
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
+import { useState, useEffect } from "react";
+import { formatDate } from "../utils/format";
+import "./Announcements.css";
 
 export default function Announcements() {
   const [announcements, setAnnouncements] = useState([]);
@@ -16,40 +8,37 @@ export default function Announcements() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [eventFilter, setEventFilter] = useState('');
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const [eventFilter, setEventFilter] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => setSearch(searchInput), 300);
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  async function fetchAnnouncements() {
-    try {
+  useEffect(() => {
+    // Using a microtask so the loading/error resets arent a synchronous setState call in the effect body itself.
+    queueMicrotask(() => {
       setLoading(true);
       setError(null);
       const params = new URLSearchParams();
-      if (eventFilter) params.set('event_id', eventFilter);
-      if (search) params.set('search', search);
+      if (eventFilter) params.set("event_id", eventFilter);
+      if (search) params.set("search", search);
 
-      const res = await fetch(`/api/public/announcements?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch announcements');
-      setAnnouncements(await res.json());
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchAnnouncements();
+      fetch(`/api/public/announcements?${params}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch announcements");
+          return res.json();
+        })
+        .then(setAnnouncements)
+        .catch((err) => setError(err.message))
+        .finally(() => setLoading(false));
+    });
   }, [eventFilter, search]);
 
-  // Event dropdown lists every event, not just active ones.
   useEffect(() => {
-    fetch('/api/public/events')
+    fetch("/api/public/events")
       .then((res) => (res.ok ? res.json() : []))
       .then(setEvents)
       .catch(() => {});
@@ -59,14 +48,35 @@ export default function Announcements() {
     <div className="announcements-page">
       <div className="page-header">
         <h1>Emergency Announcements</h1>
-        <p>Official updates and advisories issued during disaster events.</p>
       </div>
 
       <div className="content-card">
         <div className="card-toolbar">
-          <h2>All announcements</h2>
+          <select
+            className="event-select"
+            value={eventFilter}
+            onChange={(e) => setEventFilter(e.target.value)}
+          >
+            <option value="">All events</option>
+            {events.map((evt) => (
+              <option key={evt.event_id} value={evt.event_id}>
+                {evt.name}
+              </option>
+            ))}
+          </select>
+
           <div className="search-wrapper">
-            <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              className="search-icon"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
@@ -78,19 +88,6 @@ export default function Announcements() {
               onChange={(e) => setSearchInput(e.target.value)}
             />
           </div>
-        </div>
-
-        <div className="filters">
-          <select
-            className="event-select"
-            value={eventFilter}
-            onChange={(e) => setEventFilter(e.target.value)}
-          >
-            <option value="">All events</option>
-            {events.map((evt) => (
-              <option key={evt.event_id} value={evt.event_id}>{evt.name}</option>
-            ))}
-          </select>
         </div>
 
         {loading ? (
@@ -105,7 +102,9 @@ export default function Announcements() {
               <div key={a.announcement_id} className="announcement-item">
                 <div className="announcement-item-header">
                   <span className="announcement-title">{a.title}</span>
-                  <span className="announcement-date">{formatDate(a.created_at)}</span>
+                  <span className="announcement-date">
+                    {formatDate(a.created_at)}
+                  </span>
                 </div>
                 <p className="announcement-message">{a.message}</p>
                 {a.event && <span className="event-tag">{a.event.name}</span>}

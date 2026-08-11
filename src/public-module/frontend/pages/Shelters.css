@@ -1,5 +1,5 @@
 .shelters-page .page-header {
-  text-align: center;
+  text-align: left;
   margin-bottom: 32px;
 }
 
@@ -29,8 +29,9 @@
 .card-toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+  min-width: 0;
 }
 
 .card-toolbar h2 {
@@ -74,10 +75,9 @@
 
 .filters {
   display: flex;
-  align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 20px;
+  align-items: flex-start;
   flex-wrap: wrap;
 }
 
@@ -117,6 +117,12 @@
   color: #374151;
   background: #fff;
   outline: none;
+  max-width: 220px;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .area-select:focus {

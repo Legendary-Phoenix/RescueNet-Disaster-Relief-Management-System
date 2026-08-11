@@ -19,7 +19,7 @@ export default function Landing() {
           <h1>Disaster relief coordination, in one place</h1>
           <p>
             RescueNet centralizes disaster events, shelters, emergency announcements,
-            resources and volunteers for Malaysia's relief operations — helping
+            resources and volunteers for Malaysia's relief operations. Always helping
             responders, organizations and the public stay coordinated when it matters most.
           </p>
           <button className="landing-continue-btn" onClick={() => navigate('/login')}>

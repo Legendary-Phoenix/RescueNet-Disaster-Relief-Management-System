@@ -53,7 +53,6 @@ export default function VictimLookup() {
     <div className="victim-lookup-page">
       <div className="page-header">
         <h1>Victim Lookup</h1>
-        <p>Search for a loved one registered at a shelter. Only their name, shelter and disaster event are shown.</p>
       </div>
 
       <div className="content-card">

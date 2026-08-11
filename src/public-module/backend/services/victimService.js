@@ -1,11 +1,6 @@
 import pool from '../../../db.js';
 
-/**
- * Family/victim lookup. Deliberately returns only name, shelter name and
- * event name — never age, gender, registered_by or any ID — so a public,
- * unauthenticated caller cannot harvest personal details about registered
- * victims.
- */
+// Only return fields safe to expose to pubclic
 export async function search({ name, event_id, shelter_id } = {}) {
   let query = `
     SELECT v.name AS victim_name, s.name AS shelter_name, de.name AS event_name

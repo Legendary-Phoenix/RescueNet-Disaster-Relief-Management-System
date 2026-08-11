@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './Dashboard.css';
+import { formatDate } from '../utils/format.js';
 
 const TYPE_DISPLAY = {
   FLOOD: 'Flood',
@@ -7,15 +8,6 @@ const TYPE_DISPLAY = {
   SEVERE_STORM: 'Severe Storm',
   EARTHQUAKE: 'Earthquake',
 };
-
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
 
 export default function Dashboard() {
   const [events, setEvents] = useState([]);
@@ -42,7 +34,9 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    fetchDashboard();
+    queueMicrotask(() => {
+      fetchDashboard();
+    });
   }, []);
 
   const affectedAreaCount = new Set(
@@ -52,8 +46,7 @@ export default function Dashboard() {
   return (
     <div className="dashboard-page">
       <div className="page-header">
-        <h1>Disaster Relief Dashboard</h1>
-        <p>Current situation overview for active disaster events across Malaysia.</p>
+        <h1>Dashboard</h1>
       </div>
 
       {loading ? (
