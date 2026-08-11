@@ -6,10 +6,14 @@ import { getAreaDetails } from './src/organization-module/backend/controllers/ar
 import { getVolunteers, createVolunteer, updateVolunteer, removeVolunteer, updateAssignment, listShelters } from './src/organization-module/backend/controllers/volunteerController.js';
 import { getInventory, getResources, addStock, moveStock, getRequests, updateRequestStatus } from './src/organization-module/backend/controllers/resourceController.js';
 import { getTasks, createTask, updateTask, updateTaskStatus, deleteTask } from './src/organization-module/backend/controllers/taskController.js';
+import { login, register } from './src/auth-module/backend/controllers/authController.js';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.post('/api/auth/login', login);
+app.post('/api/auth/register', register);
 
 app.get('/api/organization/disaster-events', getDisasterEvents);
 app.get('/api/organization/disaster-events/:eventId/dashboard', getEventDashboard);

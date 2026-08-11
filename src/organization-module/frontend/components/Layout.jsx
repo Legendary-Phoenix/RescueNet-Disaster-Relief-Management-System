@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../auth-module/frontend/components/AuthContext';
 import './Layout.css';
 
 const navItems = [
@@ -9,6 +10,14 @@ const navItems = [
 ];
 
 export default function Layout() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    logout();
+    navigate('/login');
+  }
+
   return (
     <div className="layout">
       <aside className="sidebar">
@@ -35,8 +44,12 @@ export default function Layout() {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="org-name">Red Crescent Society</div>
-          <div className="org-user">redcrescent</div>
+          <div className="org-name">{user?.profile?.name || 'Organization'}</div>
+          <div className="org-user">{user?.username || ''}</div>
+          <button className="logout-btn" onClick={handleLogout}>
+            <LogoutIcon />
+            <span>Sign out</span>
+          </button>
         </div>
       </aside>
 
@@ -87,6 +100,16 @@ function ClipboardIcon() {
       <rect x="8" y="2" width="8" height="4" rx="1" />
       <line x1="9" y1="12" x2="15" y2="12" />
       <line x1="9" y1="16" x2="15" y2="16" />
+    </svg>
+  );
+}
+
+function LogoutIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
     </svg>
   );
 }
