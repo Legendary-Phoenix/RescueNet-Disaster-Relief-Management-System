@@ -218,20 +218,17 @@ async function seed() {
     );
     const shl = shelters.map(r => r.shelter_id);
 
-    // ---- VolunteerShelterAssignment (10) ----
+    // ---- VolunteerShelterAssignment (7) ----
     await insertRows(client, 'VolunteerShelterAssignment',
       ['volunteer_id', 'shelter_id'],
       [
         [vol[0], shl[0]],
-        [vol[0], shl[2]],
         [vol[1], shl[1]],
-        [vol[1], shl[3]],
         [vol[2], shl[4]],
         [vol[4], shl[5]],
         [vol[5], shl[6]],
         [vol[3], shl[7]],
         [vol[6], shl[8]],
-        [vol[6], shl[9]],
       ]
     );
 
@@ -475,7 +472,7 @@ async function seed() {
     console.log('  Disaster Events:      5  (3 active, 2 resolved)');
     console.log('  Event-Area Links:    14');
     console.log('  Shelters:            12  (10 open, 2 closed)');
-    console.log('  Volunteer Assign:    10');
+    console.log('  Volunteer Assign:     7');
     console.log('  Victims:             35');
     console.log('  Resources:           12  (3 per type)');
     console.log(`  Inventory:           ${inventoryRows.length}`);
