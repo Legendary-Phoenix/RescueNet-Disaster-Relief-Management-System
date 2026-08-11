@@ -10,3 +10,14 @@ export async function getDisasterEvents(req, res) {
     res.status(500).json({ error: 'Internal server error' });
   }
 }
+
+export async function getEventDashboard(req, res) {
+  try {
+    const data = await disasterEventService.getDashboard(req.params.eventId);
+    if (!data) return res.status(404).json({ error: 'Event not found' });
+    res.json(data);
+  } catch (err) {
+    console.error('Error fetching event dashboard:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}

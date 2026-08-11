@@ -201,16 +201,16 @@ async function seed() {
     const shelters = await insertRows(client, 'Shelter',
       ['name', 'address', 'contact_number', 'capacity', 'current_occupancy', 'status', 'area_id', 'created_by'],
       [
-        ['Dewan Komuniti Klang', 'Jalan Meru, 41050 Klang, Selangor', '0333711000', 250, 187, 'OPEN', area[3], admin1],
+        ['Dewan Komuniti Klang', 'Jalan Meru, 41050 Klang, Selangor', '0333711000', 250, 243, 'OPEN', area[3], admin1],
         ['SK Shah Alam', 'Persiaran Kayangan, 40000 Shah Alam, Selangor', '0355102345', 200, 134, 'OPEN', area[1], admin1],
-        ['Dewan Serbaguna PJ', 'Jalan Universiti, 46200 Petaling Jaya, Selangor', '0379566789', 180, 98, 'OPEN', area[0], admin1],
+        ['Dewan Serbaguna PJ', 'Jalan Universiti, 46200 Petaling Jaya, Selangor', '0379566789', 180, 195, 'OPEN', area[0], admin1],
         ['Balai Raya Subang Jaya', 'Jalan SS15/4, 47500 Subang Jaya, Selangor', '0356361234', 150, 112, 'OPEN', area[2], admin1],
         ['Dewan MBPJ Puchong', 'Jalan Puchong Perdana, 47100 Puchong, Selangor', '0380605678', 160, 76, 'OPEN', area[15], admin1],
-        ['SK Hulu Langat', 'Jalan Hulu Langat, 43100 Hulu Langat, Selangor', '0387379012', 120, 85, 'OPEN', area[11], admin2],
+        ['SK Hulu Langat', 'Jalan Hulu Langat, 43100 Hulu Langat, Selangor', '0387379012', 120, 118, 'OPEN', area[11], admin2],
         ['Dewan Komuniti Ampang', 'Jalan Ampang, 68000 Ampang, Selangor', '0342703456', 140, 63, 'OPEN', area[4], admin2],
-        ['Masjid As-Salam Semenyih', 'Jalan Semenyih, 43500 Semenyih, Selangor', '0387237890', 100, 42, 'OPEN', area[14], admin2],
-        ['Dewan Cheras Perdana', 'Jalan Cheras, 56100 Cheras, Kuala Lumpur', '0391321234', 200, 54, 'OPEN', area[23], admin2],
-        ['Balai Raya Kepong', 'Jalan Kepong Baru, 52100 Kepong, Kuala Lumpur', '0362575678', 130, 28, 'OPEN', area[24], admin2],
+        ['Masjid As-Salam Semenyih', 'Jalan Semenyih, 43500 Semenyih, Selangor', '0387237890', 100, 97, 'OPEN', area[14], admin2],
+        ['Dewan Cheras Perdana', 'Jalan Cheras, 56100 Cheras, Kuala Lumpur', '0391321234', 200, 168, 'OPEN', area[23], admin2],
+        ['Balai Raya Kepong', 'Jalan Kepong Baru, 52100 Kepong, Kuala Lumpur', '0362575678', 130, 94, 'OPEN', area[24], admin2],
         ['SK Shah Alam Seksyen 18', 'Seksyen 18, 40200 Shah Alam, Selangor', '0355129012', 180, 0, 'CLOSED', area[1], admin1],
         ['Dewan Komuniti Klang Selatan', 'Jalan Kapar, 42100 Klang, Selangor', '0333433456', 200, 0, 'CLOSED', area[3], admin1],
       ],
@@ -300,18 +300,19 @@ async function seed() {
     // Indices: 0=Water, 1=Milk, 2=ORS, 3=Beans, 4=Noodles, 5=Rice,
     // 6=Paracetamol, 7=ORS Salts, 8=Antiseptic, 9=Soap, 10=Sanitary, 11=Toothpaste
 
-    // ---- Inventory (58) ----
+    // ---- Inventory ----
+    // Supply levels tuned so need levels vary: CRITICAL, HIGH, MODERATE, LOW
     const shelterStock = [
-      [shl[0], [[res[0],500],[res[1],80],[res[3],250],[res[4],300],[res[5],120],[res[6],60],[res[9],200],[res[11],100]]],
-      [shl[1], [[res[0],350],[res[2],100],[res[3],180],[res[5],80],[res[6],45],[res[7],80],[res[10],60]]],
-      [shl[2], [[res[0],280],[res[1],50],[res[3],150],[res[4],200],[res[8],40],[res[9],120],[res[11],80]]],
+      [shl[0], [[res[0],50],[res[1],10],[res[3],20],[res[4],30],[res[6],8],[res[9],15]]],
+      [shl[1], [[res[0],120],[res[3],60],[res[5],40],[res[6],30],[res[10],20]]],
+      [shl[2], [[res[0],200],[res[1],40],[res[3],100],[res[4],150],[res[8],30],[res[9],80]]],
       [shl[3], [[res[0],200],[res[4],180],[res[5],60],[res[6],30],[res[9],100],[res[10],45]]],
-      [shl[4], [[res[0],180],[res[3],100],[res[5],40],[res[7],35],[res[11],50]]],
-      [shl[5], [[res[0],300],[res[2],80],[res[4],160],[res[5],70],[res[6],50],[res[8],35],[res[9],90]]],
-      [shl[6], [[res[0],200],[res[3],120],[res[1],40],[res[6],25],[res[10],35]]],
+      [shl[4], [[res[0],150],[res[3],80],[res[5],30],[res[7],25],[res[11],40]]],
+      [shl[5], [[res[0],40],[res[2],20],[res[4],30],[res[5],15],[res[8],10],[res[9],20]]],
+      [shl[6], [[res[0],80],[res[3],50],[res[1],20],[res[6],15],[res[10],20]]],
       [shl[7], [[res[0],120],[res[5],30],[res[9],50],[res[7],20]]],
-      [shl[8], [[res[0],250],[res[4],120],[res[3],80],[res[6],35],[res[11],40]]],
-      [shl[9], [[res[0],100],[res[4],80],[res[9],30],[res[8],15]]],
+      [shl[8], [[res[0],100],[res[4],60],[res[3],40],[res[6],20],[res[11],25]]],
+      [shl[9], [[res[0],80],[res[4],50],[res[9],20],[res[8],10]]],
     ];
     const inventoryRows = [];
     for (const [shelterId, items] of shelterStock) {
@@ -324,39 +325,67 @@ async function seed() {
       inventoryRows
     );
 
-    // ---- ResourceRequest (10) ----
+    // ---- ResourceRequest (14) ----
+    // Mix of statuses; PENDING/APPROVED drive need level, FULFILLED/REJECTED/REVOKED are excluded
     const requests = await insertRows(client, 'ResourceRequest',
       ['shelter_id', 'event_id', 'created_by', 'status'],
       [
         [shl[0], evt[0], vol[0], 'PENDING'],
-        [shl[2], evt[0], vol[0], 'APPROVED'],
+        [shl[0], evt[0], vol[0], 'APPROVED'],
         [shl[1], evt[0], vol[1], 'PENDING'],
+        [shl[1], evt[0], vol[1], 'APPROVED'],
+        [shl[2], evt[0], vol[0], 'APPROVED'],
         [shl[3], evt[0], vol[1], 'FULFILLED'],
         [shl[4], evt[0], vol[2], 'PENDING'],
         [shl[5], evt[1], vol[4], 'APPROVED'],
-        [shl[6], evt[1], vol[5], 'FULFILLED'],
-        [shl[7], evt[1], vol[3], 'PENDING'],
-        [shl[8], evt[2], vol[6], 'REJECTED'],
-        [shl[9], evt[2], vol[6], 'REVOKED'],
+        [shl[5], evt[1], vol[4], 'PENDING'],
+        [shl[6], evt[1], vol[5], 'PENDING'],
+        [shl[7], evt[1], vol[3], 'FULFILLED'],
+        [shl[8], evt[2], vol[6], 'PENDING'],
+        [shl[8], evt[2], vol[6], 'APPROVED'],
+        [shl[9], evt[2], vol[6], 'APPROVED'],
       ],
       'request_id'
     );
     const req = requests.map(r => r.request_id);
 
-    // ---- ResourceRequestItem (24) ----
+    // ---- ResourceRequestItem ----
     await insertRows(client, 'ResourceRequestItem',
       ['request_id', 'resource_id', 'quantity'],
       [
-        [req[0], res[0], 200], [req[0], res[5], 50],  [req[0], res[9], 100],
-        [req[1], res[3], 100], [req[1], res[4], 150],
-        [req[2], res[0], 150], [req[2], res[6], 30],  [req[2], res[10], 40],
-        [req[3], res[5], 60],  [req[3], res[2], 50],
-        [req[4], res[0], 100], [req[4], res[3], 80],
-        [req[5], res[4], 100], [req[5], res[8], 20],  [req[5], res[7], 30],
-        [req[6], res[0], 120], [req[6], res[1], 30],
-        [req[7], res[9], 40],  [req[7], res[11], 30],
-        [req[8], res[0], 80],  [req[8], res[5], 25],  [req[8], res[6], 15],
-        [req[9], res[3], 50],  [req[9], res[4], 60],
+        // shl[0] Klang — CRITICAL: supply~133, requested~450 → score≈3.4
+        [req[0], res[0], 150], [req[0], res[5], 80],  [req[0], res[9], 40],
+        [req[1], res[4], 60],  [req[1], res[6], 50],  [req[1], res[3], 70],
+
+        // shl[1] Shah Alam — HIGH: supply~270, requested~440 → score≈1.6
+        [req[2], res[0], 250], [req[2], res[6], 30],  [req[2], res[10], 40],
+        [req[3], res[3], 80],  [req[3], res[5], 40],
+
+        // shl[2] PJ — MODERATE: supply~600, requested~680 → score≈1.1
+        [req[4], res[0], 300], [req[4], res[4], 200], [req[4], res[9], 100], [req[4], res[11], 80],
+
+        // shl[3] Subang — LOW: FULFILLED request, excluded from calc → score=0
+        [req[5], res[5], 60],  [req[5], res[2], 50],
+
+        // shl[4] Puchong — MODERATE: supply~325, requested~410 → score≈1.3
+        [req[6], res[0], 200], [req[6], res[3], 100], [req[6], res[7], 50],  [req[6], res[11], 60],
+
+        // shl[5] Hulu Langat — CRITICAL: supply~135, requested~330 → score≈2.4
+        [req[7], res[4], 150], [req[7], res[8], 40],  [req[7], res[7], 60],
+        [req[8], res[0], 80],
+
+        // shl[6] Ampang — HIGH: supply~185, requested~330 → score≈1.8
+        [req[9], res[0], 180], [req[9], res[3], 80],  [req[9], res[1], 40],  [req[9], res[6], 30],
+
+        // shl[7] Semenyih — LOW: FULFILLED request, excluded → score=0
+        [req[10], res[9], 30],  [req[10], res[11], 20],
+
+        // shl[8] Cheras — HIGH: supply~245, requested~440 → score≈1.8
+        [req[11], res[0], 200], [req[11], res[4], 120],
+        [req[12], res[3], 80],  [req[12], res[6], 40],
+
+        // shl[9] Kepong — MODERATE: supply~160, requested~190 → score≈1.2
+        [req[13], res[0], 100], [req[13], res[4], 60],  [req[13], res[9], 30],
       ]
     );
 
@@ -450,8 +479,8 @@ async function seed() {
     console.log('  Victims:             35');
     console.log('  Resources:           12  (3 per type)');
     console.log(`  Inventory:           ${inventoryRows.length}`);
-    console.log('  Resource Requests:   10');
-    console.log('  Request Items:       24');
+    console.log('  Resource Requests:   14');
+    console.log('  Request Items:       35');
     console.log('  Tasks:               15');
     console.log('  Emergency Reports:    8');
     console.log('  Announcements:        4');
