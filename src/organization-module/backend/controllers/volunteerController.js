@@ -56,7 +56,7 @@ export async function updateAssignment(req, res) {
 
 export async function listShelters(req, res) {
   try {
-    const shelters = await volunteerService.getAllShelters();
+    const shelters = await volunteerService.getAllShelters({ event: req.query.event });
     res.json(shelters);
   } catch (err) {
     console.error('Error fetching shelters:', err);

@@ -5,6 +5,7 @@ import { getShelterDetails } from './src/organization-module/backend/controllers
 import { getAreaDetails } from './src/organization-module/backend/controllers/areaController.js';
 import { getVolunteers, createVolunteer, updateVolunteer, removeVolunteer, updateAssignment, listShelters } from './src/organization-module/backend/controllers/volunteerController.js';
 import { getInventory, getResources, addStock, moveStock, getRequests, updateRequestStatus } from './src/organization-module/backend/controllers/resourceController.js';
+import { getTasks, createTask, updateTask, updateTaskStatus, deleteTask } from './src/organization-module/backend/controllers/taskController.js';
 
 const app = express();
 app.use(cors());
@@ -26,6 +27,11 @@ app.post('/api/organization/inventory/add', addStock);
 app.post('/api/organization/inventory/move', moveStock);
 app.get('/api/organization/resource-requests', getRequests);
 app.put('/api/organization/resource-requests/:id/status', updateRequestStatus);
+app.get('/api/organization/tasks', getTasks);
+app.post('/api/organization/tasks', createTask);
+app.put('/api/organization/tasks/:id', updateTask);
+app.put('/api/organization/tasks/:id/status', updateTaskStatus);
+app.delete('/api/organization/tasks/:id', deleteTask);
 
 app.listen(3000, () => {
   console.log('Server running on http://localhost:3000');

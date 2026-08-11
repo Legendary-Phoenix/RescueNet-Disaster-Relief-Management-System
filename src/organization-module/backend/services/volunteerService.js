@@ -111,7 +111,19 @@ export async function updateShelterAssignment(volunteerId, shelterId) {
   }
 }
 
-export async function getAllShelters() {
+export async function getAllShelters({ event } = {}) {
+  if (event) {
+    const { rows } = await pool.query(
+      `SELECT s.shelter_id, s.name, s.status
+       FROM Shelter s
+       JOIN Area a ON s.area_id = a.area_id
+       JOIN DisasterEventArea dea ON a.area_id = dea.area_id AND dea.event_id = $1
+       WHERE s.status = 'OPEN'
+       ORDER BY s.name`,
+      [event]
+    );
+    return rows;
+  }
   const { rows } = await pool.query(
     `SELECT shelter_id, name, status FROM Shelter WHERE status = 'OPEN' ORDER BY name`
   );
