@@ -3,12 +3,18 @@ import { AuthProvider, useAuth } from './auth-module/frontend/components/AuthCon
 import Login from './auth-module/frontend/pages/Login';
 import Register from './auth-module/frontend/pages/Register';
 import PendingApproval from './auth-module/frontend/pages/PendingApproval';
+import Landing from './Landing';
 import Layout from './organization-module/frontend/components/Layout';
 import DisasterEvents from './organization-module/frontend/pages/DisasterEvents';
 import EventDashboard from './organization-module/frontend/pages/EventDashboard';
 import Volunteers from './organization-module/frontend/pages/Volunteers';
 import Resources from './organization-module/frontend/pages/Resources';
 import Tasks from './organization-module/frontend/pages/Tasks';
+import PublicLayout from './public-module/frontend/components/Layout';
+import Dashboard from './public-module/frontend/pages/Dashboard';
+import Shelters from './public-module/frontend/pages/Shelters';
+import Announcements from './public-module/frontend/pages/Announcements';
+import VictimLookup from './public-module/frontend/pages/VictimLookup';
 
 function ProtectedRoute({ role, children }) {
   const { user } = useAuth();
@@ -50,6 +56,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
           <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
           <Route path="/pending-approval" element={<PendingRoute />} />
@@ -63,7 +70,15 @@ function App() {
             <Route path="tasks" element={<Tasks />} />
           </Route>
 
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="/public" element={<ProtectedRoute role="PUBLIC"><PublicLayout /></ProtectedRoute>}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="shelters" element={<Shelters />} />
+            <Route path="announcements" element={<Announcements />} />
+            <Route path="victim-lookup" element={<VictimLookup />} />
+          </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

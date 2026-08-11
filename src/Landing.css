@@ -1,0 +1,111 @@
+.landing-page {
+  min-height: 100vh;
+  background: #f5f6fa;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Header ---- */
+
+.landing-header {
+  padding: 24px 48px;
+}
+
+.landing-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.landing-logo-mark {
+  width: 40px;
+  height: 40px;
+  background: #4361ee;
+  color: #fff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.landing-logo-name {
+  font-weight: 700;
+  font-size: 18px;
+  color: #111827;
+}
+
+/* ---- Hero ---- */
+
+.landing-hero {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 64px;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 48px 64px;
+  flex-wrap: wrap;
+}
+
+.landing-copy {
+  max-width: 480px;
+}
+
+.landing-copy h1 {
+  font-size: 36px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.landing-copy p {
+  font-size: 16px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.landing-continue-btn {
+  padding: 14px 32px;
+  background: #4361ee;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.landing-continue-btn:hover {
+  background: #3a56d4;
+}
+
+.landing-hero-image {
+  width: 280px;
+  height: auto;
+  flex-shrink: 0;
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 720px) {
+  .landing-hero {
+    flex-direction: column-reverse;
+    text-align: center;
+    padding: 24px 24px 48px;
+  }
+
+  .landing-copy {
+    max-width: none;
+  }
+
+  .landing-hero-image {
+    width: 200px;
+  }
+}

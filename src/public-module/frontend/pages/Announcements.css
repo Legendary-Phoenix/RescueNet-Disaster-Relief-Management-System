@@ -1,0 +1,153 @@
+.announcements-page .page-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.announcements-page .page-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.announcements-page .page-header p {
+  font-size: 15px;
+  color: #6b7280;
+}
+
+/* ---- Card ---- */
+
+.content-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+/* ---- Toolbar ---- */
+
+.card-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.card-toolbar h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.search-wrapper {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.search-input {
+  padding: 8px 14px 8px 38px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  width: 260px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.search-input:focus {
+  border-color: #4361ee;
+}
+
+/* ---- Filters ---- */
+
+.filters {
+  margin-bottom: 20px;
+}
+
+.event-select {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-size: 13px;
+  color: #374151;
+  background: #fff;
+  outline: none;
+}
+
+.event-select:focus {
+  border-color: #4361ee;
+}
+
+/* ---- Announcements ---- */
+
+.announcement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.announcement-item {
+  padding: 16px;
+  border: 1px solid #f3f4f6;
+  border-radius: 10px;
+}
+
+.announcement-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.announcement-title {
+  font-weight: 600;
+  font-size: 15px;
+  color: #111827;
+}
+
+.announcement-date {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.announcement-message {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.event-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #eef1fd;
+  color: #4361ee;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ---- States ---- */
+
+.state-message {
+  text-align: center;
+  padding: 48px 24px;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.state-message.error {
+  color: #dc2626;
+}
