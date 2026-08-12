@@ -4,6 +4,9 @@ import {
   updateReliefOrganizationStatus as updateOrganizationStatus,
 } from '../services/reliefOrganizationService.js'
 
+
+
+//list orgs
 export async function listReliefOrganizations(req, res) {
   try {
     const { status, search } = req.query
@@ -14,6 +17,8 @@ export async function listReliefOrganizations(req, res) {
   }
 }
 
+
+// get specific org
 export async function getReliefOrganization(req, res) {
   try {
     const organization = await getReliefOrganizationById(req.params.id)
@@ -26,9 +31,11 @@ export async function getReliefOrganization(req, res) {
   }
 }
 
+//update
 export async function updateReliefOrganizationStatus(req, res) {
   try {
     const { status } = req.body
+    //status
     if (!status) {
       return res.status(400).json({ message: 'Status is required' })
     }

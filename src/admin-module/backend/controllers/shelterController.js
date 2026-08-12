@@ -6,6 +6,8 @@ import {
 } from '../services/shelterService.js'
 import { getShelterDetail } from '../services/disasterEventService.js'
 
+
+
 export async function listSheltersHandler(req, res) {
   try {
     const { search } = req.query
@@ -32,6 +34,7 @@ export async function getShelterDetailHandler(req, res) {
   }
 }
 
+// create shelther
 export async function createShelterHandler(req, res) {
   try {
     const shelter = await createShelter({
@@ -79,3 +82,4 @@ export async function deleteShelterHandler(req, res) {
     res.status(500).json({ message: err.message })
   }
 }
+//TODO:change volunters when shelter is deleted?

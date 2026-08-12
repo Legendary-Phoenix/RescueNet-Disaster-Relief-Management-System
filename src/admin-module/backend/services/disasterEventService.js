@@ -9,12 +9,15 @@ const pool = new pg.Pool({
   database: process.env.DBNAME,
   user: process.env.USER,
   password: process.env.PASSWORD,
-})
+}
+)
 
 const EVENT_STATUS = ['ACTIVE', 'RESOLVED']
 const EVENT_TYPES = ['FLOOD', 'LANDSLIDE', 'SEVERE_STORM', 'EARTHQUAKE']
+
 const RESOURCE_TYPES = ['WATER', 'FOOD', 'MEDICINE', 'HYGIENE']
 
+//calc need level from this predetermined ratio (used in breakdwon)
 export function needLevelForRatio(ratio) {
   if (ratio > 1) return 'CRITICAL'
   if (ratio > 0.8) return 'HIGH'
@@ -22,11 +25,14 @@ export function needLevelForRatio(ratio) {
   return 'LOW'
 }
 
+
+
 async function getDefaultAdminId() {
   const result = await pool.query(
     'SELECT admin_id FROM SystemAdmin ORDER BY name LIMIT 1'
   )
   return result.rows[0]?.admin_id ?? null
+
 }
 
 function mapEvent(row) {
@@ -41,8 +47,11 @@ function mapEvent(row) {
     status: row.status,
     areaCount: Number(row.area_count),
   }
+
 }
 
+
+// sql for finding the event
 const EVENT_SELECT = `
   SELECT e.event_id, e.name, e.description, e.type, e.severity,
          e.start_date, e.end_date, e.status,
@@ -50,9 +59,12 @@ const EVENT_SELECT = `
   FROM DisasterEvent e
 `
 
+
+// list 
 export async function listDisasterEvents({ status, type, area, date, search } = {}) {
   const conditions = []
   const values = []
+  //to make sure of each 
   if (status && EVENT_STATUS.includes(status)) {
     values.push(status)
     conditions.push(`e.status = $${values.length}`)
@@ -87,10 +99,14 @@ export async function listDisasterEvents({ status, type, area, date, search } = 
   return result.rows.map(mapEvent)
 }
 
+
+
 export async function getDisasterEventById(eventId) {
   const result = await pool.query(`${EVENT_SELECT} WHERE e.event_id = $1`, [eventId])
   return result.rows[0] ? mapEvent(result.rows[0]) : null
 }
+
+
 
 export async function createDisasterEvent({
   name,
@@ -100,6 +116,7 @@ export async function createDisasterEvent({
   startDate,
   areaIds,
 }) {
+  //checks
   if (!name) throw new Error('Name is required')
   if (!EVENT_TYPES.includes(type)) throw new Error(`Invalid type "${type}"`)
   if (!['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].includes(severity)) {
@@ -134,6 +151,7 @@ export async function createDisasterEvent({
   }
 }
 
+// update
 export async function updateDisasterEventStatus({ eventId, status, endDate }) {
   if (!EVENT_STATUS.includes(status)) {
     throw new Error(`Invalid status "${status}"`)
@@ -150,6 +168,10 @@ export async function updateDisasterEventStatus({ eventId, status, endDate }) {
   return getDisasterEventById(eventId)
 }
 
+
+
+// ..:: DISASTER EVENT DASHBOARD ::..
+//  find all information for the specific disaster
 export async function getDisasterEventDashboard(eventId) {
   const event = await getDisasterEventById(eventId)
   if (!event) return null
@@ -218,6 +240,7 @@ export async function getDisasterEventDashboard(eventId) {
     [eventId]
   )
 
+  //TODO: ask if i should list detailed requested items or not 
   const requestedRes = await pool.query(
     `SELECT r.type, COALESCE(SUM(ri.quantity), 0) AS requested
      FROM ResourceRequest rq
@@ -265,6 +288,9 @@ export async function getDisasterEventDashboard(eventId) {
   }
 }
 
+
+
+
 export async function getAreaDetail(areaId, eventId) {
   const areaRes = await pool.query(
     `SELECT a.area_id, a.name, a.state,
@@ -289,6 +315,8 @@ export async function getAreaDetail(areaId, eventId) {
      ORDER BY s.name`,
     [areaId, eventId]
   )
+
+
   const shelters = sheltersRes.rows.map((row) => ({
     id: row.shelter_id,
     name: row.name,
@@ -304,6 +332,8 @@ export async function getAreaDetail(areaId, eventId) {
   for (const s of shelters) needBreakdown[s.needLevel] += 1
 
   const inventory = await getAreaInventorySummary(areaId, eventId)
+
+
 
   return {
     area: {
@@ -346,6 +376,7 @@ async function getAreaInventorySummary(areaId, eventId) {
      GROUP BY r.type`,
     [areaId, eventId]
   )
+
   const availableByType = {}
   for (const row of availableRes.rows) availableByType[row.type] = Number(row.available)
   const requestedByType = {}
@@ -356,6 +387,8 @@ async function getAreaInventorySummary(areaId, eventId) {
     requested: requestedByType[type] ?? 0,
   }))
 }
+
+
 
 export async function getShelterDetail(shelterId, eventId) {
   const shelterRes = await pool.query(
@@ -409,8 +442,10 @@ export async function getShelterDetail(shelterId, eventId) {
      WHERE rq.shelter_id = $1 AND rq.event_id = $2
      ORDER BY rq.created_at DESC`,
     [shelterId, eventId]
+
   )
   const requests = []
+
   for (const req of requestsRes.rows) {
     const itemsRes = await pool.query(
       `SELECT ri.quantity, r.name, r.unit
@@ -432,6 +467,7 @@ export async function getShelterDetail(shelterId, eventId) {
   }
 
   return {
+
     shelter: {
       id: row.shelter_id,
       name: row.name,

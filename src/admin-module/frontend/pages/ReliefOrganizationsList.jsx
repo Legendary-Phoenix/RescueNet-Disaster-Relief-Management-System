@@ -75,6 +75,10 @@ export default function ReliefOrganizationsList() {
     }
   }
 
+
+
+
+  //content card is misaligned
   return (
     <div className="relief-organizations-page">
       <div className="page-header">
@@ -115,7 +119,7 @@ export default function ReliefOrganizationsList() {
         </div>
 
         {loading ? (
-          <div className="state-message">Loading organizations...</div>
+          <div className="state-message">Loadig organizations...</div>
         ) : error ? (
           <div className="state-message error">{error}</div>
         ) : organizations.length === 0 ? (
@@ -124,7 +128,7 @@ export default function ReliefOrganizationsList() {
           <table className="orgs-table">
             <thead>
               <tr>
-                <th>ORGANIZATION</th>
+                <th>ORGANZATION</th>
                 <th>CONTACT</th>
                 <th>LOCATION</th>
                 <th>STATUS</th>

@@ -1,7 +1,13 @@
+//changed to not have a detailed breakdwno
+
+
 import pg from 'pg'
 import dotenv from 'dotenv'
 
 dotenv.config()
+
+
+
 
 const pool = new pg.Pool({
   host: process.env.DBHOST,
@@ -12,6 +18,8 @@ const pool = new pg.Pool({
 })
 
 const SHELTER_STATUS = ['OPEN', 'CLOSED']
+
+
 
 async function getDefaultAdminId() {
   const result = await pool.query(
@@ -42,6 +50,7 @@ const SHELTER_SELECT = `
   JOIN Area a ON a.area_id = s.area_id
 `
 
+//list with searhc
 export async function listShelters({ search } = {}) {
   const values = []
   let where = ''
@@ -55,6 +64,7 @@ export async function listShelters({ search } = {}) {
 
 export async function getShelterById(shelterId) {
   const result = await pool.query(`${SHELTER_SELECT} WHERE s.shelter_id = $1`, [shelterId])
+
   return result.rows[0] ? mapShelter(result.rows[0]) : null
 }
 
@@ -66,6 +76,7 @@ export async function createShelter({
   status,
   areaId,
 }) {
+  //checks
   if (!name) throw new Error('Name is required')
   if (!SHELTER_STATUS.includes(status)) throw new Error(`Invalid status "${status}"`)
   if (!areaId) throw new Error('Area is required')
@@ -90,6 +101,8 @@ export async function createShelter({
   }
 }
 
+
+
 export async function updateShelter({
   shelterId,
   name,
@@ -99,6 +112,7 @@ export async function updateShelter({
   status,
   areaId,
 }) {
+  //checks
   if (!name) throw new Error('Name is required')
   if (!SHELTER_STATUS.includes(status)) throw new Error(`Invalid status "${status}"`)
   if (!areaId) throw new Error('Area is required')
@@ -114,6 +128,7 @@ export async function updateShelter({
   return getShelterById(shelterId)
 }
 
+// deletion needswork
 export async function deleteShelter(shelterId) {
   const client = await pool.connect()
   try {
@@ -123,6 +138,7 @@ export async function deleteShelter(shelterId) {
        WHERE request_id IN (SELECT request_id FROM ResourceRequest WHERE shelter_id = $1)`,
       [shelterId]
     )
+    // TODO: check how other member handle the query
     await client.query('DELETE FROM ResourceRequest WHERE shelter_id = $1', [shelterId])
     await client.query('DELETE FROM Inventory WHERE shelter_id = $1', [shelterId])
     await client.query('DELETE FROM VolunteerShelterAssignment WHERE shelter_id = $1', [shelterId])

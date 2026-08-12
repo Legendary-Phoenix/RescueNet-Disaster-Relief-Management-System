@@ -1,6 +1,10 @@
 import { listAreas } from '../services/areaService.js'
 import { getAreaDetail } from '../services/disasterEventService.js'
 
+
+
+
+// list areas
 export async function listAreasHandler(req, res) {
   try {
     const areas = await listAreas()
@@ -10,6 +14,7 @@ export async function listAreasHandler(req, res) {
   }
 }
 
+// area detail
 export async function getAreaDetailHandler(req, res) {
   try {
     const { eventId } = req.query

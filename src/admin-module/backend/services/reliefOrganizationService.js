@@ -11,6 +11,9 @@ const pool = new pg.Pool({
   password: process.env.PASSWORD,
 })
 
+
+// check db schema
+// revoked vs rejected
 const STATUS_VALUES = ['PENDING', 'APPROVED', 'REJECTED', 'REVOKED']
 
 function mapRow(row) {
@@ -32,6 +35,8 @@ const SELECT_QUERY = `
   FROM ReliefOrganization ro
   LEFT JOIN SystemAdmin sa ON sa.admin_id = ro.approved_by
 `
+
+
 
 export async function getReliefOrganizations({ status, search } = {}) {
   const conditions = []
@@ -57,6 +62,7 @@ export async function getReliefOrganizations({ status, search } = {}) {
 
 export async function getReliefOrganizationById(orgId) {
   const result = await pool.query(`${SELECT_QUERY} WHERE ro.org_id = $1`, [orgId])
+  // return via mapped row instead
   return result.rows[0] ? mapRow(result.rows[0]) : null
 }
 
@@ -65,8 +71,10 @@ export async function updateReliefOrganizationStatus({ orgId, status, adminId })
     throw new Error(`Invalid status "${status}"`)
   }
 
+
   if (status === 'APPROVED') {
     if (!adminId) {
+      // sql LIMIT keyword didnt work llast time
       const admin = await pool.query(
         'SELECT admin_id FROM SystemAdmin ORDER BY name LIMIT 1'
       )
@@ -75,6 +83,8 @@ export async function updateReliefOrganizationStatus({ orgId, status, adminId })
   } else {
     adminId = null
   }
+
+
 
   const result = await pool.query(
     `UPDATE ReliefOrganization

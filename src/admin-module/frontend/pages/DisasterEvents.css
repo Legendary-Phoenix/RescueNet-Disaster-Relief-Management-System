@@ -16,7 +16,7 @@
 }
 
 /* ---- Toolbar actions ---- */
-
+/* change to inline-flex */
 .toolbar-actions {
   display: flex;
   align-items: center;
@@ -119,6 +119,7 @@
   border-bottom: none;
 }
 
+/* change to inline-flex */
 .event-name {
   display: inline-flex;
   align-items: center;

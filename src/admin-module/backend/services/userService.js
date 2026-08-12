@@ -52,6 +52,8 @@ const SELECT_QUERY = `
   LEFT JOIN publicuser pu ON pu.user_id = u.user_id
 `
 
+
+//list 
 export async function listUsers({ search } = {}) {
   const values = []
   let where = ''
@@ -97,6 +99,8 @@ function normalizeProfile({ name, contactNumber, age, gender, organizationId, ad
   }
 }
 
+
+//insert the real role
 async function insertRoleRow(client, userId, role, profile) {
   const { table, idColumn } = ROLE_CONFIG[role]
   let columns
@@ -136,6 +140,7 @@ async function insertRoleRow(client, userId, role, profile) {
   )
 }
 
+//should allow for roles to update as well
 async function updateRoleRow(client, userId, role, profile) {
   const { table, idColumn } = ROLE_CONFIG[role]
   let sets
@@ -216,6 +221,7 @@ export async function createUser({
   }
 }
 
+//UPDATE
 export async function updateUser({
   userId,
   username,
@@ -285,6 +291,8 @@ export async function updateUser({
   }
 }
 
+
+//deletioin should now support
 export async function deleteUser(userId) {
   const client = await pool.connect()
   try {
@@ -303,7 +311,9 @@ export async function deleteUser(userId) {
     return { id: userId }
   } catch (err) {
     await client.query('ROLLBACK')
+    //this should still catch any errors that are from FKs being in  other records
     if (err.code === '23503') {
+
       throw new Error(
         'Cannot delete this user — they are referenced by other records.',
         { cause: err }

@@ -63,7 +63,7 @@ export default function UsersList() {
       .then((data) => {
         if (!cancelled) setOrganizations(data)
       })
-      .catch(() => {})
+      .catch(() => { })
     return () => {
       cancelled = true
     }
@@ -171,6 +171,8 @@ export default function UsersList() {
     }
   }
 
+
+  // still doesnt look entirely the same as figma board
   return (
     <div className="users-page">
       <div className="page-header">

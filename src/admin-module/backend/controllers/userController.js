@@ -5,6 +5,9 @@ import {
   deleteUser,
 } from '../services/userService.js'
 
+
+
+
 export async function listUsersHandler(req, res) {
   try {
     const { search } = req.query
@@ -15,6 +18,8 @@ export async function listUsersHandler(req, res) {
   }
 }
 
+
+// in service it needs to put the new entry in the correct role table
 export async function createUserHandler(req, res) {
   try {
     const user = await createUser({
@@ -34,6 +39,7 @@ export async function createUserHandler(req, res) {
   }
 }
 
+// update 
 export async function updateUserHandler(req, res) {
   try {
     const user = await updateUser({
@@ -57,6 +63,7 @@ export async function updateUserHandler(req, res) {
   }
 }
 
+// deletion also requires checkin the role table
 export async function deleteUserHandler(req, res) {
   try {
     await deleteUser(req.params.id)

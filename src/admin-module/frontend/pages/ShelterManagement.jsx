@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import Modal from '../components/Modal.jsx'
 import './ShelterManagement.css'
 
+
+//init fomr
 const EMPTY_FORM = {
   name: '',
   address: '',
@@ -25,6 +27,12 @@ export default function ShelterManagement() {
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleting, setDeleting] = useState(false)
 
+
+
+
+
+
+
   useEffect(() => {
     const timer = setTimeout(() => setSearch(searchInput), 300)
     return () => clearTimeout(timer)
@@ -36,7 +44,7 @@ export default function ShelterManagement() {
         res.ok ? res.json() : Promise.reject(new Error('Failed to load areas'))
       )
       .then(setAreas)
-      .catch(() => {})
+      .catch(() => { })
   }, [])
 
   const fetchShelters = useCallback(async () => {
@@ -55,6 +63,7 @@ export default function ShelterManagement() {
         setShelters(data)
         setError(null)
       })
+
       .catch((err) => {
         if (!cancelled) setError(err.message)
       })
@@ -69,6 +78,11 @@ export default function ShelterManagement() {
   function refresh() {
     fetchShelters().then(setShelters).catch(setError)
   }
+
+
+
+
+
 
   function openAdd() {
     setForm(EMPTY_FORM)
@@ -116,6 +130,8 @@ export default function ShelterManagement() {
       setSaving(false)
     }
   }
+
+
 
   async function handleDelete() {
     if (!deleteTarget) return
@@ -182,7 +198,7 @@ export default function ShelterManagement() {
                 <th>AREA</th>
                 <th>CONTACT</th>
                 <th>CAPACITY</th>
-                <th>OCCUPANCY</th>
+                <th>OCCUANCY</th>
                 <th>STATUS</th>
                 <th>ACTIONS</th>
               </tr>

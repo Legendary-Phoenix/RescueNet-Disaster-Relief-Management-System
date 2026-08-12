@@ -5,6 +5,9 @@ import {
   updateDisasterEventStatus,
 } from '../services/disasterEventService.js'
 
+
+
+// list all disasters
 export async function listDisasterEventsHandler(req, res) {
   try {
     const { status, type, area, date, search } = req.query
@@ -14,6 +17,8 @@ export async function listDisasterEventsHandler(req, res) {
     res.status(500).json({ message: err.message })
   }
 }
+
+
 
 export async function getDisasterEventDashboardHandler(req, res) {
   try {
@@ -27,6 +32,8 @@ export async function getDisasterEventDashboardHandler(req, res) {
   }
 }
 
+
+//create disaster (hah)
 export async function createDisasterEventHandler(req, res) {
   try {
     const event = await createDisasterEvent({
@@ -43,9 +50,12 @@ export async function createDisasterEventHandler(req, res) {
   }
 }
 
+
+// update
 export async function updateDisasterEventStatusHandler(req, res) {
   try {
     const { status, endDate } = req.body
+    //status should be required
     if (!status) {
       return res.status(400).json({ message: 'Status is required' })
     }
@@ -65,3 +75,4 @@ export async function updateDisasterEventStatusHandler(req, res) {
     res.status(500).json({ message: err.message })
   }
 }
+//TODO: 
