@@ -21,6 +21,12 @@ export async function createUserHandler(req, res) {
       username: req.body.username,
       password: req.body.password,
       role: req.body.role,
+      name: req.body.name,
+      contactNumber: req.body.contactNumber,
+      age: req.body.age,
+      gender: req.body.gender,
+      organizationId: req.body.organizationId,
+      address: req.body.address,
     })
     res.status(201).json(user)
   } catch (err) {
@@ -35,6 +41,12 @@ export async function updateUserHandler(req, res) {
       username: req.body.username,
       role: req.body.role,
       password: req.body.password,
+      name: req.body.name,
+      contactNumber: req.body.contactNumber,
+      age: req.body.age,
+      gender: req.body.gender,
+      organizationId: req.body.organizationId,
+      address: req.body.address,
     })
     res.status(200).json(user)
   } catch (err) {

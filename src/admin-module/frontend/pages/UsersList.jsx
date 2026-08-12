@@ -11,10 +11,21 @@ const ROLE_OPTIONS = [
 
 const ROLE_LABELS = Object.fromEntries(ROLE_OPTIONS.map((r) => [r.value, r.label]))
 
+const GENDER_OPTIONS = [
+  { value: 'MALE', label: 'Male' },
+  { value: 'FEMALE', label: 'Female' },
+]
+
 const EMPTY_FORM = {
   username: '',
   password: '',
   role: 'VOLUNTEER',
+  name: '',
+  contactNumber: '',
+  age: '',
+  gender: '',
+  organizationId: '',
+  address: '',
 }
 
 function formatDate(value) {
@@ -38,11 +49,25 @@ export default function UsersList() {
   const [formError, setFormError] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleting, setDeleting] = useState(false)
+  const [organizations, setOrganizations] = useState([])
 
   useEffect(() => {
     const timer = setTimeout(() => setSearch(searchInput), 300)
     return () => clearTimeout(timer)
   }, [searchInput])
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/admin/relief-organizations?status=APPROVED')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        if (!cancelled) setOrganizations(data)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const fetchUsers = useCallback(async () => {
     const params = new URLSearchParams()
@@ -86,6 +111,12 @@ export default function UsersList() {
       username: user.username,
       password: '',
       role: user.role,
+      name: user.name || '',
+      contactNumber: user.contactNumber || '',
+      age: user.age ?? '',
+      gender: user.gender || '',
+      organizationId: user.organizationId || '',
+      address: user.address || '',
     })
     setFormError(null)
     setModal({ mode: 'edit', user })
@@ -181,6 +212,7 @@ export default function UsersList() {
             <thead>
               <tr>
                 <th>USERNAME</th>
+                <th>NAME</th>
                 <th>ROLE</th>
                 <th>CREATED</th>
                 <th>ACTIONS</th>
@@ -195,6 +227,7 @@ export default function UsersList() {
                       <span className="user-id">{user.id}</span>
                     </span>
                   </td>
+                  <td>{user.name || '—'}</td>
                   <td>
                     <span className={`role-badge ${user.role.toLowerCase().replace('_', '-')}`}>
                       {ROLE_LABELS[user.role] || user.role}
@@ -257,6 +290,18 @@ export default function UsersList() {
                 />
               </div>
               <div className="form-field full">
+                <label className="form-label" htmlFor="user-name">
+                  Name
+                </label>
+                <input
+                  id="user-name"
+                  className="form-input"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-field full">
                 <label className="form-label" htmlFor="user-password">
                   {modal.mode === 'edit' ? 'New password (optional)' : 'Password'}
                 </label>
@@ -289,6 +334,86 @@ export default function UsersList() {
                   ))}
                 </select>
               </div>
+              <div className="form-field">
+                <label className="form-label" htmlFor="user-contact">
+                  Contact number
+                </label>
+                <input
+                  id="user-contact"
+                  className="form-input"
+                  value={form.contactNumber}
+                  onChange={(e) => setForm({ ...form, contactNumber: e.target.value })}
+                />
+              </div>
+              {(form.role === 'VOLUNTEER' || form.role === 'PUBLIC') && (
+                <div className="form-field">
+                  <label className="form-label" htmlFor="user-age">
+                    Age
+                  </label>
+                  <input
+                    id="user-age"
+                    type="number"
+                    min="0"
+                    className="form-input"
+                    value={form.age}
+                    onChange={(e) => setForm({ ...form, age: e.target.value })}
+                  />
+                </div>
+              )}
+              {(form.role === 'VOLUNTEER' || form.role === 'PUBLIC') && (
+                <div className="form-field">
+                  <label className="form-label" htmlFor="user-gender">
+                    Gender
+                  </label>
+                  <select
+                    id="user-gender"
+                    className="form-select"
+                    value={form.gender}
+                    onChange={(e) => setForm({ ...form, gender: e.target.value })}
+                  >
+                    <option value="">—</option>
+                    {GENDER_OPTIONS.map((g) => (
+                      <option key={g.value} value={g.value}>
+                        {g.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {form.role === 'RELIEF_ORG' && (
+                <div className="form-field full">
+                  <label className="form-label" htmlFor="user-address">
+                    Address
+                  </label>
+                  <textarea
+                    id="user-address"
+                    className="form-input"
+                    rows="2"
+                    value={form.address}
+                    onChange={(e) => setForm({ ...form, address: e.target.value })}
+                  />
+                </div>
+              )}
+              {form.role === 'VOLUNTEER' && (
+                <div className="form-field full">
+                  <label className="form-label" htmlFor="user-organization">
+                    Relief organization
+                  </label>
+                  <select
+                    id="user-organization"
+                    className="form-select"
+                    value={form.organizationId}
+                    onChange={(e) => setForm({ ...form, organizationId: e.target.value })}
+                  >
+                    <option value="">—</option>
+                    {organizations.map((org) => (
+                      <option key={org.id} value={org.id}>
+                        {org.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
             {formError && <div className="form-error">{formError}</div>}
             <div className="modal-actions">
