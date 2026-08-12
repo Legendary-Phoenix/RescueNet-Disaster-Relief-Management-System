@@ -77,9 +77,14 @@
   font-size: 14px;
   font-weight: 500;
   color: #6b7280;
+  border: none;
   border-left: 3px solid transparent;
   transition: all 0.15s ease;
   cursor: pointer;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
 }
 
 .nav-item:hover {
