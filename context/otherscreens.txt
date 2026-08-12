@@ -1,0 +1,52 @@
+## **SCREEN 2. Disaster Event Dashboard 
+**Features**
+**Event List (Top Section)**
+- Filter:
+	- Status (active/resolved)
+	- Area
+	- Type
+	- Date
+- Search
+- Create event PANEL:
+	- (basic description)
+	- affected areas
+- Mark as resolved
+## **EVENT SCREEN**
+show the name of the event in big letters at the top
+Instead of navigating away, show everything **in one screen**:
+**Event Dashboard Sections**
+**1. Area Overview 
+- List of affected areas
+- Each shows:
+	- Need level (color-coded)
+	- shelters
+	- victims
+**2. Shelter Overview**
+- List of shelters in the event
+- Each shows:
+	- Capacity vs occupancy
+	- Status (normal / overloaded)
+	- Need indicator
+**3. Resource Overview 
+- Total available vs requested
+- Breakdown by resource type
+
+**3. Unified Details Panel** (or put this in the same event dashboard screen)
+**Panel Behavior**
+**If Area selected:**
+- List shelters
+- Area-level inventory summary
+- Need level breakdown
+**If Shelter selected:**
+- Shelter info
+- Victim count
+- Inventory breakdown
+- Resource requests
+(Same UI component, different data)
+## **SHELTER SCREEN: Shelter Management**
+ **Features**
+- List shelters
+- Search
+- Add shelter
+- Edit shelter
+- Delete shelter

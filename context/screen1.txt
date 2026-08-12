@@ -1,0 +1,17 @@
+ADMIN RELIEF ORGANIZATION MANAGEMENT
+**Features:**
+- List organizations
+- Filter (pending / approved / rejected / revoked)
+- Search
+- Approve / reject / revoke
+- View details (side panel)
+	- name 
+	- address
+	- contact info 
+	- status 
+	- approved by (which admin)
+
+some styling hints:
+use the same sort of styling as the example given,
+like put the account name and logout button on bottom left of dashboard
+have navigation pane on the left side
