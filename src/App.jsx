@@ -4,6 +4,7 @@ import ReliefOrganizationsList from './admin-module/frontend/pages/ReliefOrganiz
 import DisasterEvents from './admin-module/frontend/pages/DisasterEvents.jsx'
 import DisasterEventDashboard from './admin-module/frontend/pages/DisasterEventDashboard.jsx'
 import ShelterManagement from './admin-module/frontend/pages/ShelterManagement.jsx'
+import UsersList from './admin-module/frontend/pages/UsersList.jsx'
 
 function App() {
   const [page, setPage] = useState('relief-organizations')
@@ -34,6 +35,9 @@ function App() {
       break
     case 'shelters':
       content = <ShelterManagement />
+      break
+    case 'users':
+      content = <UsersList />
       break
     default:
       content = <ReliefOrganizationsList />

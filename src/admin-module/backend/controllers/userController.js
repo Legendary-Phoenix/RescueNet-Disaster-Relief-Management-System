@@ -1,0 +1,61 @@
+import {
+  listUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+} from '../services/userService.js'
+
+export async function listUsersHandler(req, res) {
+  try {
+    const { search } = req.query
+    const users = await listUsers({ search })
+    res.status(200).json(users)
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+}
+
+export async function createUserHandler(req, res) {
+  try {
+    const user = await createUser({
+      username: req.body.username,
+      password: req.body.password,
+      role: req.body.role,
+    })
+    res.status(201).json(user)
+  } catch (err) {
+    res.status(400).json({ message: err.message })
+  }
+}
+
+export async function updateUserHandler(req, res) {
+  try {
+    const user = await updateUser({
+      userId: req.params.id,
+      username: req.body.username,
+      role: req.body.role,
+      password: req.body.password,
+    })
+    res.status(200).json(user)
+  } catch (err) {
+    if (err.message === 'User not found') {
+      return res.status(404).json({ message: err.message })
+    }
+    res.status(400).json({ message: err.message })
+  }
+}
+
+export async function deleteUserHandler(req, res) {
+  try {
+    await deleteUser(req.params.id)
+    res.status(200).json({ message: 'User deleted' })
+  } catch (err) {
+    if (err.message === 'User not found') {
+      return res.status(404).json({ message: err.message })
+    }
+    if (err.message.startsWith('Cannot delete')) {
+      return res.status(400).json({ message: err.message })
+    }
+    res.status(500).json({ message: err.message })
+  }
+}

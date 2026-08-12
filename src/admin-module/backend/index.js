@@ -18,6 +18,12 @@ import {
   updateShelterHandler,
   deleteShelterHandler,
 } from './controllers/shelterController.js'
+import {
+  listUsersHandler,
+  createUserHandler,
+  updateUserHandler,
+  deleteUserHandler,
+} from './controllers/userController.js'
 
 const app = express()
 
@@ -40,6 +46,11 @@ app.post('/api/admin/shelters', createShelterHandler)
 app.get('/api/admin/shelters/:id', getShelterDetailHandler)
 app.put('/api/admin/shelters/:id', updateShelterHandler)
 app.delete('/api/admin/shelters/:id', deleteShelterHandler)
+
+app.get('/api/admin/users', listUsersHandler)
+app.post('/api/admin/users', createUserHandler)
+app.put('/api/admin/users/:id', updateUserHandler)
+app.delete('/api/admin/users/:id', deleteUserHandler)
 
 const PORT = 3000
 
