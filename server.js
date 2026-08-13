@@ -3,27 +3,27 @@ import {
   listReliefOrganizations,
   getReliefOrganization,
   updateReliefOrganizationStatus,
-} from './controllers/reliefOrganizationController.js'
+} from './src/admin-module/backend/controllers/reliefOrganizationController.js'
 import {
   listDisasterEventsHandler,
   getDisasterEventDashboardHandler,
   createDisasterEventHandler,
   updateDisasterEventStatusHandler,
-} from './controllers/disasterEventController.js'
-import { listAreasHandler, getAreaDetailHandler } from './controllers/areaController.js'
+} from './src/admin-module/backend/controllers/disasterEventController.js'
+import { listAreasHandler, getAreaDetailHandler } from './src/admin-module/backend/controllers/areaController.js'
 import {
   listSheltersHandler,
   getShelterDetailHandler,
   createShelterHandler,
   updateShelterHandler,
   deleteShelterHandler,
-} from './controllers/shelterController.js'
+} from './src/admin-module/backend/controllers/shelterController.js'
 import {
   listUsersHandler,
   createUserHandler,
   updateUserHandler,
   deleteUserHandler,
-} from './controllers/userController.js'
+} from './src/admin-module/backend/controllers/userController.js'
 
 const app = express()
 
