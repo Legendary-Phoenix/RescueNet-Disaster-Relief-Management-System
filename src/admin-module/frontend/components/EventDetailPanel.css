@@ -1,0 +1,210 @@
+/* ---- Need badges ---- */
+
+.need-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.need-badge.low {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.need-badge.moderate {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.need-badge.high {
+  background: #ffedd5;
+  color: #ea580c;
+}
+
+.need-badge.critical {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* ---- Shelter status badges ---- */
+
+.status-badge.open {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.status-badge.closed {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.status-badge.fulfilled {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* ---- Occupancy bar ---- */
+
+.occupancy-bar {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.occupancy-fill {
+  display: block;
+  height: 100%;
+  background: #4361ee;
+  border-radius: 3px;
+  transition: width 0.2s;
+}
+
+/* ---- Detail list ---- */
+
+.detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-list-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #f3f4f6;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.detail-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.detail-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.detail-item-sub {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.detail-item-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.detail-empty {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+/* ---- Detail table ---- */
+
+.detail-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-table-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 13px;
+}
+
+.detail-table-row:last-child {
+  border-bottom: none;
+}
+
+.detail-table-label {
+  color: #374151;
+  font-weight: 500;
+}
+
+.detail-table-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.detail-table-value {
+  color: #6b7280;
+  font-size: 12px;
+  text-align: right;
+}
+
+/* ---- Need breakdown ---- */
+
+.need-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.need-breakdown-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.need-breakdown-count {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ---- Resource requests ---- */
+
+.request-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.request-item {
+  border: 1px solid #f3f4f6;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fafafa;
+}
+
+.request-item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.request-date {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.request-items {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 13px;
+  color: #374151;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

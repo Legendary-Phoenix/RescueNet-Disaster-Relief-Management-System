@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './auth-module/frontend/components/AuthContext';
 import Login from './auth-module/frontend/pages/Login';
@@ -15,6 +16,13 @@ import Dashboard from './public-module/frontend/pages/Dashboard';
 import Shelters from './public-module/frontend/pages/Shelters';
 import Announcements from './public-module/frontend/pages/Announcements';
 import VictimLookup from './public-module/frontend/pages/VictimLookup';
+
+import AdminLayout from './admin-module/frontend/components/Layout';
+import ReliefOrganizationsList from './admin-module/frontend/pages/ReliefOrganizationsList';
+import AdminDisasterEvents from './admin-module/frontend/pages/DisasterEvents';
+import DisasterEventDashboard from './admin-module/frontend/pages/DisasterEventDashboard';
+import ShelterManagement from './admin-module/frontend/pages/ShelterManagement';
+import UsersList from './admin-module/frontend/pages/UsersList';
 
 function ProtectedRoute({ role, children }) {
   const { user } = useAuth();
@@ -51,6 +59,52 @@ function PendingRoute() {
   return <PendingApproval />;
 }
 
+function AdminApp() {
+  const [page, setPage] = useState('relief-organizations');
+  const [selectedEventId, setSelectedEventId] = useState(null);
+
+  function handleNavigate(id) {
+    setSelectedEventId(null);
+    setPage(id);
+  }
+
+  function handleOpenEvent(eventId) {
+    setSelectedEventId(eventId);
+    setPage('disaster-event-dashboard');
+  }
+
+  let content;
+  switch (page) {
+    case 'disaster-events':
+      content = <AdminDisasterEvents onOpenEvent={handleOpenEvent} />;
+      break;
+    case 'disaster-event-dashboard':
+      content = (
+        <DisasterEventDashboard
+          eventId={selectedEventId}
+          onBack={() => setPage('disaster-events')}
+        />
+      );
+      break;
+    case 'shelters':
+      content = <ShelterManagement />;
+      break;
+    case 'users':
+      content = <UsersList />;
+      break;
+    default:
+      content = <ReliefOrganizationsList />;
+  }
+
+  const navId = page === 'disaster-event-dashboard' ? 'disaster-events' : page;
+
+  return (
+    <AdminLayout activePage={navId} onNavigate={handleNavigate}>
+      {content}
+    </AdminLayout>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -60,6 +114,8 @@ function App() {
           <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
           <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
           <Route path="/pending-approval" element={<PendingRoute />} />
+
+          <Route path="/admin" element={<ProtectedRoute role="ADMIN"><AdminApp /></ProtectedRoute>} />
 
           <Route path="/organization" element={<ProtectedRoute role="RELIEF_ORG"><Layout /></ProtectedRoute>}>
             <Route index element={<Navigate to="disaster-events" replace />} />

@@ -1,18 +1,41 @@
 import express from 'express';
 import cors from 'cors';
+import { login, register } from './src/auth-module/backend/controllers/authController.js';
 import { getDisasterEvents, getEventDashboard } from './src/organization-module/backend/controllers/disasterEventController.js';
 import { getShelterDetails } from './src/organization-module/backend/controllers/shelterController.js';
 import { getAreaDetails } from './src/organization-module/backend/controllers/areaController.js';
 import { getVolunteers, createVolunteer, updateVolunteer, removeVolunteer, updateAssignment, listShelters } from './src/organization-module/backend/controllers/volunteerController.js';
 import { getInventory, getResources, addStock, moveStock, getRequests, updateRequestStatus } from './src/organization-module/backend/controllers/resourceController.js';
 import { getTasks, createTask, updateTask, updateTaskStatus, deleteTask } from './src/organization-module/backend/controllers/taskController.js';
-import { login, register } from './src/auth-module/backend/controllers/authController.js';
-
-// public module
 import { getEvents } from './src/public-module/backend/controllers/disasterEventController.js';
 import { getAnnouncements, getRecentAnnouncements } from './src/public-module/backend/controllers/announcementController.js';
 import { getShelters, getShelterById } from './src/public-module/backend/controllers/shelterController.js';
 import { searchVictims } from './src/public-module/backend/controllers/victimController.js';
+import {
+  listReliefOrganizations,
+  getReliefOrganization,
+  updateReliefOrganizationStatus,
+} from './src/admin-module/backend/controllers/reliefOrganizationController.js';
+import {
+  listDisasterEventsHandler,
+  getDisasterEventDashboardHandler,
+  createDisasterEventHandler,
+  updateDisasterEventStatusHandler,
+} from './src/admin-module/backend/controllers/disasterEventController.js';
+import { listAreasHandler, getAreaDetailHandler } from './src/admin-module/backend/controllers/areaController.js';
+import {
+  listSheltersHandler,
+  getShelterDetailHandler,
+  createShelterHandler,
+  updateShelterHandler,
+  deleteShelterHandler,
+} from './src/admin-module/backend/controllers/shelterController.js';
+import {
+  listUsersHandler,
+  createUserHandler,
+  updateUserHandler,
+  deleteUserHandler,
+} from './src/admin-module/backend/controllers/userController.js';
 
 const app = express();
 app.use(cors());
@@ -49,6 +72,25 @@ app.get('/api/public/announcements/recent', getRecentAnnouncements);
 app.get('/api/public/shelters', getShelters);
 app.get('/api/public/shelters/:id', getShelterById);
 app.get('/api/public/victims/search', searchVictims);
+
+app.get('/api/admin/relief-organizations', listReliefOrganizations);
+app.get('/api/admin/relief-organizations/:id', getReliefOrganization);
+app.patch('/api/admin/relief-organizations/:id/status', updateReliefOrganizationStatus);
+app.get('/api/admin/disaster-events', listDisasterEventsHandler);
+app.post('/api/admin/disaster-events', createDisasterEventHandler);
+app.get('/api/admin/disaster-events/:id/dashboard', getDisasterEventDashboardHandler);
+app.patch('/api/admin/disaster-events/:id/status', updateDisasterEventStatusHandler);
+app.get('/api/admin/areas', listAreasHandler);
+app.get('/api/admin/areas/:id', getAreaDetailHandler);
+app.get('/api/admin/shelters', listSheltersHandler);
+app.post('/api/admin/shelters', createShelterHandler);
+app.get('/api/admin/shelters/:id', getShelterDetailHandler);
+app.put('/api/admin/shelters/:id', updateShelterHandler);
+app.delete('/api/admin/shelters/:id', deleteShelterHandler);
+app.get('/api/admin/users', listUsersHandler);
+app.post('/api/admin/users', createUserHandler);
+app.put('/api/admin/users/:id', updateUserHandler);
+app.delete('/api/admin/users/:id', deleteUserHandler);
 
 app.listen(3000, () => {
   console.log('Server running on http://localhost:3000');

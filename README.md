@@ -128,19 +128,19 @@ This ensures:
 
 ```
 backend/
-├── routes.js
+├── index.js
 ├── controllers/
 ├── services/
 ```
 
-#### 📍 routes.js
+#### 📍 index.js
 
-**Purpose:** Defines API endpoints and connects them to controllers
+**Purpose:** Sets up the Express app and registers API endpoints directly on the app (no router), connecting them to controllers
 
 **Example:**
 
 ```javascript
-router.post("/victims", registerVictim);
+app.get("/api/admin/relief-organizations", listReliefOrganizations);
 ```
 
 ---
