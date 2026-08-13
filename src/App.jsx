@@ -17,6 +17,12 @@ import Shelters from './public-module/frontend/pages/Shelters';
 import Announcements from './public-module/frontend/pages/Announcements';
 import VictimLookup from './public-module/frontend/pages/VictimLookup';
 
+import VolunteerLayout from './volunteer-module/frontend/components/Layout';
+import VolunteerDashboard from './volunteer-module/frontend/pages/Dashboard';
+import MyTasks from './volunteer-module/frontend/pages/MyTasks';
+import Victims from './volunteer-module/frontend/pages/Victims';
+import Requests from './volunteer-module/frontend/pages/Requests';
+
 import AdminLayout from './admin-module/frontend/components/Layout';
 import ReliefOrganizationsList from './admin-module/frontend/pages/ReliefOrganizationsList';
 import AdminDisasterEvents from './admin-module/frontend/pages/DisasterEvents';
@@ -124,6 +130,14 @@ function App() {
             <Route path="volunteers" element={<Volunteers />} />
             <Route path="resources" element={<Resources />} />
             <Route path="tasks" element={<Tasks />} />
+          </Route>
+
+          <Route path="/volunteer" element={<ProtectedRoute role="VOLUNTEER"><VolunteerLayout /></ProtectedRoute>}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<VolunteerDashboard />} />
+            <Route path="tasks" element={<MyTasks />} />
+            <Route path="victims" element={<Victims />} />
+            <Route path="requests" element={<Requests />} />
           </Route>
 
           <Route path="/public" element={<ProtectedRoute role="PUBLIC"><PublicLayout /></ProtectedRoute>}>

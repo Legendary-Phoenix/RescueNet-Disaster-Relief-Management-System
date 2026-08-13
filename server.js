@@ -36,6 +36,10 @@ import {
   updateUserHandler,
   deleteUserHandler,
 } from './src/admin-module/backend/controllers/userController.js';
+import { getDashboard, getProfile, getMyShelter, getAssignedShelters } from './src/volunteer-module/backend/controllers/dashboardController.js';
+import { listTasks, getTaskStats, updateTaskStatus as volunteerUpdateTaskStatus } from './src/volunteer-module/backend/controllers/taskController.js';
+import { registerVictim, listVictims, getVictimStats, updateVictimStatus, assignVictimShelter, getVictimOptions } from './src/volunteer-module/backend/controllers/victimController.js';
+import { listRequests, getRequestStats, getRequest, createRequest, updateRequest, withdrawRequest, listResources, listRequestableEvents, getRequestOptions } from './src/volunteer-module/backend/controllers/resourceRequestController.js';
 
 const app = express();
 app.use(cors());
@@ -91,6 +95,32 @@ app.get('/api/admin/users', listUsersHandler);
 app.post('/api/admin/users', createUserHandler);
 app.put('/api/admin/users/:id', updateUserHandler);
 app.delete('/api/admin/users/:id', deleteUserHandler);
+
+app.get('/api/volunteer/dashboard', getDashboard);
+app.get('/api/volunteer/profile', getProfile);
+app.get('/api/volunteer/shelter', getMyShelter);
+app.get('/api/volunteer/shelters', getAssignedShelters);
+
+app.get('/api/volunteer/tasks', listTasks);
+app.get('/api/volunteer/tasks/stats', getTaskStats);
+app.put('/api/volunteer/tasks/:id/status', volunteerUpdateTaskStatus);
+
+app.get('/api/volunteer/victims', listVictims);
+app.get('/api/volunteer/victims/stats', getVictimStats);
+app.get('/api/volunteer/victims/options', getVictimOptions);
+app.post('/api/volunteer/victims', registerVictim);
+app.put('/api/volunteer/victims/:id/status', updateVictimStatus);
+app.put('/api/volunteer/victims/:id/shelter', assignVictimShelter);
+
+app.get('/api/volunteer/requests', listRequests);
+app.get('/api/volunteer/requests/stats', getRequestStats);
+app.get('/api/volunteer/requests/options', getRequestOptions);
+app.get('/api/volunteer/requests/events', listRequestableEvents);
+app.get('/api/volunteer/resources', listResources);
+app.post('/api/volunteer/requests', createRequest);
+app.get('/api/volunteer/requests/:id', getRequest);
+app.put('/api/volunteer/requests/:id', updateRequest);
+app.delete('/api/volunteer/requests/:id', withdrawRequest);
 
 app.listen(3000, () => {
   console.log('Server running on http://localhost:3000');
