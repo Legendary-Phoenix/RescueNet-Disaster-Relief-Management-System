@@ -119,7 +119,7 @@ export default function ReliefOrganizationsList() {
         </div>
 
         {loading ? (
-          <div className="state-message">Loadig organizations...</div>
+          <div className="state-message">Loading organizations...</div>
         ) : error ? (
           <div className="state-message error">{error}</div>
         ) : organizations.length === 0 ? (
@@ -128,7 +128,7 @@ export default function ReliefOrganizationsList() {
           <table className="orgs-table">
             <thead>
               <tr>
-                <th>ORGANZATION</th>
+                <th>ORGANIZATION</th>
                 <th>CONTACT</th>
                 <th>LOCATION</th>
                 <th>STATUS</th>

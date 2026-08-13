@@ -198,7 +198,7 @@ export default function ShelterManagement() {
                 <th>AREA</th>
                 <th>CONTACT</th>
                 <th>CAPACITY</th>
-                <th>OCCUANCY</th>
+                <th>OCCUPANCY</th>
                 <th>STATUS</th>
                 <th>ACTIONS</th>
               </tr>

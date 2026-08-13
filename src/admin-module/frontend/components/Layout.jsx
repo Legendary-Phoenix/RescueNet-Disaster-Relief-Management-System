@@ -1,3 +1,5 @@
+import { useAuth } from '../../../auth-module/frontend/components/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import './Layout.css'
 
 const navItems = [
@@ -8,6 +10,14 @@ const navItems = [
 ]
 
 export default function Layout({ activePage = 'relief-organizations', onNavigate, children }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  function handleSignOut() {
+    logout();
+    navigate('/login');
+  }
+
   return (
     <div className="layout">
       <aside className="sidebar">
@@ -35,9 +45,9 @@ export default function Layout({ activePage = 'relief-organizations', onNavigate
         </nav>
 
         <div className="sidebar-footer">
-          <div className="org-name">Encik Razali bin Mohd</div>
-          <div className="org-user">admin1</div>
-          <button type="button" className="logout-btn">
+          <div className="org-name">{user?.name}</div>
+          <div className="org-user">{user?.username}</div>
+          <button type="button" className="logout-btn" onClick={handleSignOut}>
             <LogoutIcon />
             <span>Sign out</span>
           </button>
