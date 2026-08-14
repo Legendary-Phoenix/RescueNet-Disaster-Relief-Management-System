@@ -82,7 +82,6 @@ export default function Dashboard() {
                   <div key={evt.event_id} className="event-item">
                     <div className="event-item-header">
                       <span className="event-name">{evt.name}</span>
-                      <span className={`severity-badge ${evt.severity.toLowerCase()}`}>{evt.severity}</span>
                     </div>
                     <div className="event-meta">
                       {TYPE_DISPLAY[evt.type] || evt.type} · Since {formatDate(evt.start_date)}

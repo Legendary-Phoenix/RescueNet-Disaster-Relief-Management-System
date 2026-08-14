@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import hero from './assets/hero.png';
+import hero from '../../../assets/hero.png';
 import './Landing.css';
 
 export default function Landing() {
@@ -18,9 +18,9 @@ export default function Landing() {
         <div className="landing-copy">
           <h1>Disaster relief coordination, in one place</h1>
           <p>
-            RescueNet centralizes disaster events, shelters, emergency announcements,
-            resources and volunteers for Malaysia's relief operations. Always helping
-            responders, organizations and the public stay coordinated when it matters most.
+            RescueNet centralizes disaster events, shelters, resources and volunteers
+            for Malaysia's relief operations. Always helping responders, organizations
+            and the public stay coordinated when it matters most.
           </p>
           <button className="landing-continue-btn" onClick={() => navigate('/login')}>
             Continue

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './VictimLookup.css';
+import { formatDate } from '../utils/format.js';
 
 const MIN_NAME_LENGTH = 2;
 
@@ -103,6 +104,7 @@ export default function VictimLookup() {
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Registered at</th>
                   <th>Shelter</th>
                   <th>Disaster event</th>
                 </tr>
@@ -111,6 +113,7 @@ export default function VictimLookup() {
                 {results.map((v, i) => (
                   <tr key={`${v.name}-${i}`}>
                     <td>{v.name}</td>
+                    <td>{formatDate(v.registered_at)}</td>
                     <td>{v.shelter_name}</td>
                     <td>{v.event_name}</td>
                   </tr>

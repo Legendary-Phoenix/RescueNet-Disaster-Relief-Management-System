@@ -13,7 +13,7 @@ export async function findAll({ search, status, area_id } = {}) {
 
   if (search) {
     params.push(`%${search}%`);
-    query += ` AND (s.name ILIKE $${params.length} OR s.address ILIKE $${params.length})`;
+    query += ` AND s.name ILIKE $${params.length}`;
   }
   if (status) {
     params.push(status);

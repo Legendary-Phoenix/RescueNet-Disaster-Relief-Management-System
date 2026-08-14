@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import './Auth.css';
 
@@ -13,6 +13,7 @@ export default function PendingApproval() {
 
   return (
     <div className="auth-page">
+      <Link to="/" className="auth-back-link">&larr; Back to home</Link>
       <div className="auth-card pending-card">
         <div className="pending-icon">
           <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

@@ -11,6 +11,7 @@ import { getEvents } from './src/public-module/backend/controllers/disasterEvent
 import { getAnnouncements, getRecentAnnouncements } from './src/public-module/backend/controllers/announcementController.js';
 import { getShelters, getShelterById } from './src/public-module/backend/controllers/shelterController.js';
 import { searchVictims } from './src/public-module/backend/controllers/victimController.js';
+import { getAreas as getPublicAreas, getAreaDetails as getPublicAreaDetails } from './src/public-module/backend/controllers/areaController.js';
 import {
   listReliefOrganizations,
   getReliefOrganization,
@@ -40,6 +41,12 @@ import { getDashboard, getProfile, getMyShelter, getAssignedShelters } from './s
 import { listTasks, getTaskStats, updateTaskStatus as volunteerUpdateTaskStatus } from './src/volunteer-module/backend/controllers/taskController.js';
 import { registerVictim, listVictims, getVictimStats, updateVictimStatus, assignVictimShelter, getVictimOptions } from './src/volunteer-module/backend/controllers/victimController.js';
 import { listRequests, getRequestStats, getRequest, createRequest, updateRequest, withdrawRequest, listResources, listRequestableEvents, getRequestOptions } from './src/volunteer-module/backend/controllers/resourceRequestController.js';
+import {
+  listAnnouncementsHandler,
+  createAnnouncementHandler,
+  updateAnnouncementHandler,
+  deleteAnnouncementHandler,
+} from './src/admin-module/backend/controllers/announcementController.js';
 
 const app = express();
 app.use(cors());
@@ -76,6 +83,8 @@ app.get('/api/public/announcements/recent', getRecentAnnouncements);
 app.get('/api/public/shelters', getShelters);
 app.get('/api/public/shelters/:id', getShelterById);
 app.get('/api/public/victims/search', searchVictims);
+app.get('/api/public/areas', getPublicAreas);
+app.get('/api/public/areas/:areaId', getPublicAreaDetails);
 
 app.get('/api/admin/relief-organizations', listReliefOrganizations);
 app.get('/api/admin/relief-organizations/:id', getReliefOrganization);
@@ -95,6 +104,10 @@ app.get('/api/admin/users', listUsersHandler);
 app.post('/api/admin/users', createUserHandler);
 app.put('/api/admin/users/:id', updateUserHandler);
 app.delete('/api/admin/users/:id', deleteUserHandler);
+app.get('/api/admin/announcements', listAnnouncementsHandler);
+app.post('/api/admin/announcements', createAnnouncementHandler);
+app.put('/api/admin/announcements/:id', updateAnnouncementHandler);
+app.delete('/api/admin/announcements/:id', deleteAnnouncementHandler);
 
 app.get('/api/volunteer/dashboard', getDashboard);
 app.get('/api/volunteer/profile', getProfile);

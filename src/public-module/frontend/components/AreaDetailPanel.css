@@ -1,0 +1,189 @@
+/* ---- Backdrop ---- */
+
+.panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 90;
+}
+
+/* ---- Panel ---- */
+
+.area-detail-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 420px;
+  height: 100vh;
+  background: #fff;
+  border-left: 1px solid #e5e7eb;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  overflow-y: auto;
+  padding: 28px 24px;
+  animation: areaSlideIn 0.2s ease-out;
+}
+
+@keyframes areaSlideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.panel-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.panel-close:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.panel-loading {
+  text-align: center;
+  color: #6b7280;
+  padding: 48px 0;
+  font-size: 14px;
+}
+
+.panel-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 4px;
+  padding-right: 32px;
+}
+
+.panel-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  display: block;
+  margin-bottom: 16px;
+}
+
+/* ---- Stats ---- */
+
+.area-panel-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.area-panel-stat {
+  flex: 1;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.area-panel-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.area-panel-stat-label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* ---- Sections ---- */
+
+.area-panel-section {
+  margin-bottom: 20px;
+}
+
+.area-panel-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.area-panel-empty {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 13px;
+  padding: 16px 0;
+}
+
+/* ---- Shelter list ---- */
+
+.area-panel-shelter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.area-panel-shelter-item {
+  padding: 12px;
+  border: 1px solid #f3f4f6;
+  border-radius: 8px;
+}
+
+.area-panel-shelter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.area-panel-shelter-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.area-panel-shelter-address {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 2px;
+}
+
+.area-panel-shelter-contact {
+  font-size: 12px;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+/* ---- Capacity bar ---- */
+
+.area-panel-capacity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.area-panel-capacity-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: #f3f4f6;
+  overflow: hidden;
+}
+
+.area-panel-capacity-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.area-panel-capacity-text {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
