@@ -6,6 +6,7 @@ const navItems = [
   { id: 'relief-organizations', label: 'Relief Organizations', icon: BuildingIcon },
   { id: 'disaster-events', label: 'Disaster Events', icon: CalendarIcon },
   { id: 'shelters', label: 'Shelters', icon: HomeIcon },
+  { id: 'announcements', label: 'Announcements', icon: MegaphoneIcon },
   { id: 'users', label: 'Users', icon: UserIcon },
 ]
 
@@ -90,6 +91,15 @@ function HomeIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
       <polyline points="9 22 9 12 15 12 15 22" />
+    </svg>
+  )
+}
+
+function MegaphoneIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 11l18-5v12L3 13v-2z" />
+      <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
     </svg>
   )
 }

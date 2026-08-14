@@ -23,6 +23,7 @@ import ReliefOrganizationsList from './admin-module/frontend/pages/ReliefOrganiz
 import AdminDisasterEvents from './admin-module/frontend/pages/DisasterEvents';
 import DisasterEventDashboard from './admin-module/frontend/pages/DisasterEventDashboard';
 import ShelterManagement from './admin-module/frontend/pages/ShelterManagement';
+import AdminAnnouncements from './admin-module/frontend/pages/Announcements';
 import UsersList from './admin-module/frontend/pages/UsersList';
 
 function ProtectedRoute({ role, children }) {
@@ -89,6 +90,9 @@ function AdminApp() {
       break;
     case 'shelters':
       content = <ShelterManagement />;
+      break;
+    case 'announcements':
+      content = <AdminAnnouncements />;
       break;
     case 'users':
       content = <UsersList />;

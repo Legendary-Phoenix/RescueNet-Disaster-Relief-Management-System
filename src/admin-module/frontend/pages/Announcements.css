@@ -1,0 +1,73 @@
+.announcements-page .page-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.announcements-page .page-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.announcements-page .page-header p {
+  font-size: 15px;
+  color: #6b7280;
+}
+
+/* ---- Table ---- */
+
+.announcements-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.announcements-table th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  letter-spacing: 0.04em;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.announcements-table td {
+  padding: 16px;
+  font-size: 14px;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.announcements-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.announcements-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.announcement-title-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-weight: 600;
+  color: #111827;
+  max-width: 360px;
+}
+
+.announcement-message-preview {
+  font-size: 12px;
+  font-weight: 400;
+  color: #9ca3af;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Row actions ---- */
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+}

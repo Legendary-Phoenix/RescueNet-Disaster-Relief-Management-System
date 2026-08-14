@@ -11,7 +11,7 @@ import { getEvents } from './src/public-module/backend/controllers/disasterEvent
 import { getAnnouncements, getRecentAnnouncements } from './src/public-module/backend/controllers/announcementController.js';
 import { getShelters, getShelterById } from './src/public-module/backend/controllers/shelterController.js';
 import { searchVictims } from './src/public-module/backend/controllers/victimController.js';
-<<<<<<< Updated upstream
+import { getAreas as getPublicAreas, getAreaDetails as getPublicAreaDetails } from './src/public-module/backend/controllers/areaController.js';
 import {
   listReliefOrganizations,
   getReliefOrganization,
@@ -37,9 +37,12 @@ import {
   updateUserHandler,
   deleteUserHandler,
 } from './src/admin-module/backend/controllers/userController.js';
-=======
-import { getAreas as getPublicAreas, getAreaDetails as getPublicAreaDetails } from './src/public-module/backend/controllers/areaController.js';
->>>>>>> Stashed changes
+import {
+  listAnnouncementsHandler,
+  createAnnouncementHandler,
+  updateAnnouncementHandler,
+  deleteAnnouncementHandler,
+} from './src/admin-module/backend/controllers/announcementController.js';
 
 const app = express();
 app.use(cors());
@@ -97,6 +100,10 @@ app.get('/api/admin/users', listUsersHandler);
 app.post('/api/admin/users', createUserHandler);
 app.put('/api/admin/users/:id', updateUserHandler);
 app.delete('/api/admin/users/:id', deleteUserHandler);
+app.get('/api/admin/announcements', listAnnouncementsHandler);
+app.post('/api/admin/announcements', createAnnouncementHandler);
+app.put('/api/admin/announcements/:id', updateAnnouncementHandler);
+app.delete('/api/admin/announcements/:id', deleteAnnouncementHandler);
 
 app.listen(3000, () => {
   console.log('Server running on http://localhost:3000');
