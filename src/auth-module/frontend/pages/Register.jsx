@@ -78,6 +78,7 @@ export default function Register() {
 
   return (
     <div className="auth-page">
+      <Link to="/" className="auth-back-link">&larr; Back to home</Link>
       <div className="auth-card">
         <div className="auth-header">
           <div className="auth-logo">RN</div>

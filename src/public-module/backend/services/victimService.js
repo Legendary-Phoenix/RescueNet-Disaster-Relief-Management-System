@@ -3,7 +3,7 @@ import pool from '../../../db.js';
 // Only return fields safe to expose to pubclic
 export async function search({ name, event_id, shelter_id } = {}) {
   let query = `
-    SELECT v.name AS victim_name, s.name AS shelter_name, de.name AS event_name
+    SELECT v.name AS victim_name, v.registered_at, s.name AS shelter_name, de.name AS event_name
     FROM Victim v
     JOIN Shelter s ON s.shelter_id = v.shelter_id
     JOIN DisasterEvent de ON de.event_id = v.event_id
@@ -27,6 +27,7 @@ export async function search({ name, event_id, shelter_id } = {}) {
   // Field whitelisting happens here, at the service layer, not the controller.
   return rows.map((row) => ({
     name: row.victim_name,
+    registered_at: row.registered_at,
     shelter_name: row.shelter_name,
     event_name: row.event_name,
   }));

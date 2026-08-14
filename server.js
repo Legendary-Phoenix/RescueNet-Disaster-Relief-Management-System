@@ -11,6 +11,7 @@ import { getEvents } from './src/public-module/backend/controllers/disasterEvent
 import { getAnnouncements, getRecentAnnouncements } from './src/public-module/backend/controllers/announcementController.js';
 import { getShelters, getShelterById } from './src/public-module/backend/controllers/shelterController.js';
 import { searchVictims } from './src/public-module/backend/controllers/victimController.js';
+<<<<<<< Updated upstream
 import {
   listReliefOrganizations,
   getReliefOrganization,
@@ -36,6 +37,9 @@ import {
   updateUserHandler,
   deleteUserHandler,
 } from './src/admin-module/backend/controllers/userController.js';
+=======
+import { getAreas as getPublicAreas, getAreaDetails as getPublicAreaDetails } from './src/public-module/backend/controllers/areaController.js';
+>>>>>>> Stashed changes
 
 const app = express();
 app.use(cors());
@@ -72,6 +76,8 @@ app.get('/api/public/announcements/recent', getRecentAnnouncements);
 app.get('/api/public/shelters', getShelters);
 app.get('/api/public/shelters/:id', getShelterById);
 app.get('/api/public/victims/search', searchVictims);
+app.get('/api/public/areas', getPublicAreas);
+app.get('/api/public/areas/:areaId', getPublicAreaDetails);
 
 app.get('/api/admin/relief-organizations', listReliefOrganizations);
 app.get('/api/admin/relief-organizations/:id', getReliefOrganization);

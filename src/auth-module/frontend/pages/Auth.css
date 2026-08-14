@@ -3,10 +3,28 @@
 .auth-page {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background: #f5f6fa;
   padding: 24px;
+}
+
+.auth-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  text-decoration: none;
+  margin-bottom: 16px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.auth-back-link:hover {
+  color: #4361ee;
 }
 
 .auth-card {

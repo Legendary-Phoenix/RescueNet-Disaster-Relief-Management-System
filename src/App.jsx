@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './auth-module/frontend/components/AuthCon
 import Login from './auth-module/frontend/pages/Login';
 import Register from './auth-module/frontend/pages/Register';
 import PendingApproval from './auth-module/frontend/pages/PendingApproval';
-import Landing from './Landing';
+import Landing from './auth-module/frontend/pages/Landing';
 import Layout from './organization-module/frontend/components/Layout';
 import DisasterEvents from './organization-module/frontend/pages/DisasterEvents';
 import EventDashboard from './organization-module/frontend/pages/EventDashboard';
@@ -14,6 +14,7 @@ import Tasks from './organization-module/frontend/pages/Tasks';
 import PublicLayout from './public-module/frontend/components/Layout';
 import Dashboard from './public-module/frontend/pages/Dashboard';
 import Shelters from './public-module/frontend/pages/Shelters';
+import Areas from './public-module/frontend/pages/Areas';
 import Announcements from './public-module/frontend/pages/Announcements';
 import VictimLookup from './public-module/frontend/pages/VictimLookup';
 
@@ -130,6 +131,7 @@ function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="shelters" element={<Shelters />} />
+            <Route path="areas" element={<Areas />} />
             <Route path="announcements" element={<Announcements />} />
             <Route path="victim-lookup" element={<VictimLookup />} />
           </Route>
