@@ -2,8 +2,9 @@ import './AreaDetailPanel.css';
 
 function CapacityBar({ current, capacity }) {
   const pct = capacity > 0 ? Math.min((current / capacity) * 100, 100) : 0;
+  const full = capacity > 0 && current >= capacity;
   const overloaded = current > capacity;
-  const color = overloaded ? '#dc2626' : pct > 80 ? '#d97706' : '#16a34a';
+  const color = full ? '#dc2626' : pct > 80 ? '#d97706' : '#16a34a';
   return (
     <div className="area-panel-capacity">
       <div className="area-panel-capacity-bar">

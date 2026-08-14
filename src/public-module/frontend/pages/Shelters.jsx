@@ -140,6 +140,13 @@ function ShelterCard({ shelter }) {
     [shelter],
   );
 
+  const occupancyColor = useMemo(() => {
+    const full = shelter.capacity > 0 && shelter.current_occupancy >= shelter.capacity;
+    if (full) return '#dc2626';
+    if (occupancyPct > 80) return '#d97706';
+    return '#16a34a';
+  }, [shelter, occupancyPct]);
+
   return (
     <div className="shelter-card">
       <div className="shelter-card-header">
@@ -156,7 +163,7 @@ function ShelterCard({ shelter }) {
         <div className="occupancy-bar">
           <div
             className="occupancy-fill"
-            style={{ width: `${Math.min(occupancyPct, 100)}%` }}
+            style={{ width: `${Math.min(occupancyPct, 100)}%`, background: occupancyColor }}
           />
         </div>
         <span className="occupancy-text">
