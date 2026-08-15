@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { login, register } from './src/auth-module/backend/controllers/authController.js';
 import { getDisasterEvents, getEventDashboard } from './src/organization-module/backend/controllers/disasterEventController.js';
 import { getShelterDetails } from './src/organization-module/backend/controllers/shelterController.js';
@@ -135,6 +137,13 @@ app.get('/api/volunteer/requests/:id', getRequest);
 app.put('/api/volunteer/requests/:id', updateRequest);
 app.delete('/api/volunteer/requests/:id', withdrawRequest);
 
-app.listen(3000, () => {
-  console.log('Server running on http://localhost:3000');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+app.use(express.static(path.join(__dirname, 'dist')));
+app.get('{*path}', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

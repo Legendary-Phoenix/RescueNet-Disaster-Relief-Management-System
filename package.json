@@ -5,11 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"node server.js\" \"vite\"",
-    "server": "node server.js",
+    "start": "node server.js",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "backend": "node server.js"
+    "preview": "vite preview"
   },
   "dependencies": {
     "cors": "^2.8.6",

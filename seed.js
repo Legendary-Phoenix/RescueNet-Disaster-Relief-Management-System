@@ -5,7 +5,7 @@ const env = dotenv.config().parsed;
 
 const pool = new pg.Pool({
   host: env.DBHOST,
-  port: parseInt(env.PORT),
+  port: parseInt(env.DBPORT),
   database: env.DBNAME,
   user: env.USER,
   password: env.PASSWORD,
