@@ -2,45 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useVolunteer, volunteerQuery } from '../components/volunteerContext';
 import './Victims.css';
 
-const VICTIM_STATUSES = ['CHECKED_IN', 'MEDICAL_ATTENTION', 'TRANSFERRED', 'DISCHARGED'];
 const GENDERS = ['MALE', 'FEMALE'];
-
-const STATUS_LABELS = {
-  CHECKED_IN: 'Checked In',
-  MEDICAL_ATTENTION: 'Medical Attention',
-  TRANSFERRED: 'Transferred',
-  DISCHARGED: 'Discharged',
-};
-
-const NEED_LABELS = {
-  INFANT_CARE: 'Infant Care',
-  ELDERLY_MOBILITY: 'Elderly / Mobility',
-  MEDICAL_SUPPLIES: 'Medical Supplies',
-  DIETARY_RESTRICTIONS: 'Dietary Restrictions',
-  PREGNANCY: 'Pregnancy',
-  DISABILITY_SUPPORT: 'Disability Support',
-  CHRONIC_ILLNESS: 'Chronic Illness',
-  UNACCOMPANIED_MINOR: 'Unaccompanied Minor',
-};
-
-const DEFAULT_NEED_LIMITS = { maxCustomNeeds: 3, maxNeedLength: 60 };
-
-// Preset tags are stored as SCREAMING_CASE; a custom need is whatever the volunteer
-// typed and must be shown back to them verbatim.
-function needLabel(tag) {
-  if (NEED_LABELS[tag]) return NEED_LABELS[tag];
-  if (!/^[A-Z0-9_]+$/.test(tag)) return tag;
-  return tag.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-// Presets and custom entries land in the same TEXT[] column; blank rows are dropped
-// so an empty "Other" box never registers a nameless need.
-function collectNeeds(form) {
-  const custom = form.customNeedsOn
-    ? form.customNeeds.map((n) => n.trim()).filter(Boolean)
-    : [];
-  return [...form.specialNeeds, ...custom];
-}
 
 function formatDate(d) {
   if (!d) return '—';
@@ -51,13 +13,8 @@ const EMPTY_FORM = {
   name: '',
   age: '',
   gender: '',
-  contactNumber: '',
   shelterId: '',
   eventId: '',
-  status: 'CHECKED_IN',
-  specialNeeds: [],
-  customNeedsOn: false,
-  customNeeds: [''],
 };
 
 export default function Victims() {
@@ -65,11 +22,8 @@ export default function Victims() {
 
   const [victims, setVictims] = useState([]);
   const [stats, setStats] = useState(null);
-  const [presetNeeds, setPresetNeeds] = useState([]);
-  const [needLimits, setNeedLimits] = useState(DEFAULT_NEED_LIMITS);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -83,7 +37,7 @@ export default function Victims() {
   const fetchVictims = useCallback(async () => {
     setLoading(true);
     try {
-      const query = volunteerQuery(volunteerId, activeShelterId, { status: statusFilter, search });
+      const query = volunteerQuery(volunteerId, activeShelterId, { search });
       const [vRes, sRes] = await Promise.all([
         fetch(`/api/volunteer/victims?${query}`),
         fetch(`/api/volunteer/victims/stats?${volunteerQuery(volunteerId, activeShelterId)}`),
@@ -92,23 +46,17 @@ export default function Victims() {
       setStats(await sRes.json());
     } catch { /* ignore */ }
     finally { setLoading(false); }
-  }, [volunteerId, activeShelterId, statusFilter, search]);
+  }, [volunteerId, activeShelterId, search]);
 
   useEffect(() => {
-    async function loadOptions() {
+    async function loadEvents() {
       try {
-        const [optRes, evRes] = await Promise.all([
-          fetch(`/api/volunteer/victims/options?volunteerId=${volunteerId}`),
-          fetch(`/api/volunteer/requests/events?volunteerId=${volunteerId}`),
-        ]);
-        const options = await optRes.json();
-        setPresetNeeds(options.specialNeeds || []);
-        setNeedLimits({ ...DEFAULT_NEED_LIMITS, ...(options.limits || {}) });
+        const evRes = await fetch(`/api/volunteer/requests/events?volunteerId=${volunteerId}`);
         setEvents(await evRes.json());
       } catch { /* ignore */ }
     }
     if (ready && volunteerId) {
-      loadOptions();
+      loadEvents();
       fetchVictims();
     }
   }, [ready, volunteerId, fetchVictims]);
@@ -128,11 +76,8 @@ export default function Victims() {
           name: form.name.trim(),
           age: form.age ? parseInt(form.age, 10) : null,
           gender: form.gender || null,
-          contactNumber: form.contactNumber || null,
           shelterId: form.shelterId,
           eventId: form.eventId,
-          status: form.status,
-          specialNeeds: collectNeeds(form),
         }),
       });
       const data = await res.json();
@@ -147,13 +92,13 @@ export default function Victims() {
     }
   }
 
-  async function handleStatusChange(victimId, newStatus) {
+  // Discharge hands the bed back by clearing the shelter — the registration itself is
+  // kept, so the victim stays findable under "registered by me" and in the event counts.
+  async function handleDischarge(victimId) {
     setUpdatingId(victimId);
     try {
-      await fetch(`/api/volunteer/victims/${victimId}/status?volunteerId=${volunteerId}`, {
+      await fetch(`/api/volunteer/victims/${victimId}/discharge?volunteerId=${volunteerId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
       });
       fetchVictims();
     } catch { /* ignore */ }
@@ -174,43 +119,6 @@ export default function Victims() {
       fetchVictims();
     } catch { /* ignore */ }
     finally { setUpdatingId(null); }
-  }
-
-  function toggleNeed(need) {
-    setForm((f) => ({
-      ...f,
-      specialNeeds: f.specialNeeds.includes(need)
-        ? f.specialNeeds.filter((n) => n !== need)
-        : [...f.specialNeeds, need],
-    }));
-  }
-
-  // Unticking "Other" throws the typed text away rather than submitting a need the
-  // volunteer can no longer see.
-  function toggleCustomNeeds() {
-    setForm((f) => (
-      f.customNeedsOn
-        ? { ...f, customNeedsOn: false, customNeeds: [''] }
-        : { ...f, customNeedsOn: true }
-    ));
-  }
-
-  function updateCustomNeed(index, value) {
-    setForm((f) => ({
-      ...f,
-      customNeeds: f.customNeeds.map((n, i) => (i === index ? value : n)),
-    }));
-  }
-
-  function addCustomNeed() {
-    setForm((f) => ({ ...f, customNeeds: [...f.customNeeds, ''] }));
-  }
-
-  function removeCustomNeed(index) {
-    setForm((f) => {
-      const remaining = f.customNeeds.filter((_, i) => i !== index);
-      return { ...f, customNeeds: remaining.length ? remaining : [''] };
-    });
   }
 
   function openRegister() {
@@ -238,22 +146,6 @@ export default function Victims() {
             <span className="stat-label">Total</span>
           </div>
           <div className="stat-card">
-            <span className="stat-value checked-in">{stats.checked_in}</span>
-            <span className="stat-label">Checked In</span>
-          </div>
-          <div className="stat-card">
-            <span className="stat-value medical">{stats.medical_attention}</span>
-            <span className="stat-label">Medical Attention</span>
-          </div>
-          <div className="stat-card">
-            <span className="stat-value transferred">{stats.transferred}</span>
-            <span className="stat-label">Transferred</span>
-          </div>
-          <div className="stat-card">
-            <span className="stat-value discharged">{stats.discharged}</span>
-            <span className="stat-label">Discharged</span>
-          </div>
-          <div className="stat-card">
             <span className="stat-value mine">{stats.registered_by_me}</span>
             <span className="stat-label">Registered By Me</span>
           </div>
@@ -268,22 +160,10 @@ export default function Victims() {
           <input
             className="search-input"
             type="text"
-            placeholder="Search by name or contact..."
+            placeholder="Search by name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <div className="filter-group">
-            <button className={`filter-chip${!statusFilter ? ' active' : ''}`} onClick={() => setStatusFilter('')}>All</button>
-            {VICTIM_STATUSES.map((s) => (
-              <button
-                key={s}
-                className={`filter-chip${statusFilter === s ? ' active' : ''}`}
-                onClick={() => setStatusFilter(s)}
-              >
-                {STATUS_LABELS[s]}
-              </button>
-            ))}
-          </div>
         </div>
 
         {loading ? (
@@ -299,15 +179,15 @@ export default function Victims() {
                   onClick={() => setExpandedId(expandedId === v.victim_id ? null : v.victim_id)}
                 >
                   <div className="victim-title-area">
-                    <span className={`status-dot ${v.status?.toLowerCase().replace('_', '-')}`} />
+                    <span className={`status-dot ${v.shelter_id ? 'in-shelter' : 'discharged'}`} />
                     <div>
                       <h3 className="victim-name">{v.name}</h3>
                       <span className="victim-meta">
                         {[v.age && `Age ${v.age}`, v.gender, v.shelter_name].filter(Boolean).join(' · ')}
                       </span>
                     </div>
-                    <span className={`status-badge ${v.status?.toLowerCase().replace('_', '-')}`}>
-                      {STATUS_LABELS[v.status] || v.status}
+                    <span className={`status-badge ${v.shelter_id ? 'in-shelter' : 'discharged'}`}>
+                      {v.shelter_id ? 'In Shelter' : 'Discharged'}
                     </span>
                   </div>
                   <svg
@@ -325,8 +205,8 @@ export default function Victims() {
                   <div className="victim-card-body">
                     <div className="victim-detail-grid">
                       <div className="detail-item">
-                        <span className="detail-label">Contact</span>
-                        <span className="detail-value">{v.contact_number || '—'}</span>
+                        <span className="detail-label">Shelter</span>
+                        <span className="detail-value">{v.shelter_name || '—'}</span>
                       </div>
                       <div className="detail-item">
                         <span className="detail-label">Event</span>
@@ -340,52 +220,24 @@ export default function Victims() {
                         <span className="detail-label">Registered By</span>
                         <span className="detail-value">{v.registered_by_name || '—'}</span>
                       </div>
-                      {v.special_needs?.length > 0 && (
-                        <div className="detail-item full-width">
-                          <span className="detail-label">Special Needs</span>
-                          <div className="needs-tags">
-                            {v.special_needs.map((n) => <span key={n} className="need-tag">{needLabel(n)}</span>)}
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     <div className="victim-card-actions">
-                      {v.status !== 'DISCHARGED' && v.status !== 'TRANSFERRED' && (
-                        <>
-                          {v.status === 'CHECKED_IN' && (
-                            <button
-                              className="btn-sm btn-warning"
-                              disabled={updatingId === v.victim_id}
-                              onClick={() => handleStatusChange(v.victim_id, 'MEDICAL_ATTENTION')}
-                            >
-                              {updatingId === v.victim_id ? 'Updating...' : 'Mark Medical Attention'}
-                            </button>
-                          )}
-                          {v.status === 'MEDICAL_ATTENTION' && (
-                            <button
-                              className="btn-sm btn-start"
-                              disabled={updatingId === v.victim_id}
-                              onClick={() => handleStatusChange(v.victim_id, 'CHECKED_IN')}
-                            >
-                              {updatingId === v.victim_id ? 'Updating...' : 'Back to Checked In'}
-                            </button>
-                          )}
-                          <button
-                            className="btn-sm btn-secondary"
-                            disabled={updatingId === v.victim_id}
-                            onClick={() => { setMoveModal(v); setMoveShelter(''); }}
-                          >
-                            Transfer Shelter
-                          </button>
-                          <button
-                            className="btn-sm btn-complete"
-                            disabled={updatingId === v.victim_id}
-                            onClick={() => handleStatusChange(v.victim_id, 'DISCHARGED')}
-                          >
-                            {updatingId === v.victim_id ? 'Updating...' : 'Discharge'}
-                          </button>
-                        </>
+                      <button
+                        className="btn-sm btn-secondary"
+                        disabled={updatingId === v.victim_id}
+                        onClick={() => { setMoveModal(v); setMoveShelter(''); }}
+                      >
+                        {v.shelter_id ? 'Transfer Shelter' : 'Re-admit to Shelter'}
+                      </button>
+                      {v.shelter_id && (
+                        <button
+                          className="btn-sm btn-complete"
+                          disabled={updatingId === v.victim_id}
+                          onClick={() => handleDischarge(v.victim_id)}
+                        >
+                          {updatingId === v.victim_id ? 'Updating...' : 'Discharge'}
+                        </button>
                       )}
                     </div>
                   </div>
@@ -437,16 +289,6 @@ export default function Victims() {
               </div>
 
               <div className="form-group">
-                <label>Contact Number</label>
-                <input
-                  type="text"
-                  value={form.contactNumber}
-                  onChange={(e) => setForm((f) => ({ ...f, contactNumber: e.target.value }))}
-                  placeholder="Optional"
-                />
-              </div>
-
-              <div className="form-group">
                 <label>Shelter *</label>
                 <select value={form.shelterId} onChange={(e) => setForm((f) => ({ ...f, shelterId: e.target.value }))} required>
                   <option value="">Select shelter</option>
@@ -466,75 +308,6 @@ export default function Victims() {
                 </select>
               </div>
 
-              <div className="form-group">
-                <label>Admission Status</label>
-                <select value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}>
-                  {VICTIM_STATUSES.slice(0, 2).map((s) => (
-                    <option key={s} value={s}>{STATUS_LABELS[s]}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Special Needs</label>
-                <div className="needs-grid">
-                  {presetNeeds.map((n) => (
-                    <label key={n} className={`need-option${form.specialNeeds.includes(n) ? ' selected' : ''}`}>
-                      <input
-                        type="checkbox"
-                        checked={form.specialNeeds.includes(n)}
-                        onChange={() => toggleNeed(n)}
-                      />
-                      <span>{needLabel(n)}</span>
-                    </label>
-                  ))}
-
-                  <label className={`need-option need-option-other${form.customNeedsOn ? ' selected' : ''}`}>
-                    <input
-                      type="checkbox"
-                      checked={form.customNeedsOn}
-                      onChange={toggleCustomNeeds}
-                    />
-                    <span>Other / Custom Special Need</span>
-                  </label>
-                </div>
-
-                {form.customNeedsOn && (
-                  <div className="custom-needs">
-                    {form.customNeeds.map((value, index) => (
-                      <div key={index} className="custom-need-row">
-                        <input
-                          type="text"
-                          value={value}
-                          maxLength={needLimits.maxNeedLength}
-                          placeholder="Describe the need, e.g. Requires insulin refrigeration"
-                          onChange={(e) => updateCustomNeed(index, e.target.value)}
-                        />
-                        {form.customNeeds.length > 1 && (
-                          <button
-                            type="button"
-                            className="btn-remove"
-                            aria-label="Remove custom need"
-                            onClick={() => removeCustomNeed(index)}
-                          >
-                            ×
-                          </button>
-                        )}
-                      </div>
-                    ))}
-
-                    {form.customNeeds.length < needLimits.maxCustomNeeds && (
-                      <button type="button" className="btn-add-item" onClick={addCustomNeed}>
-                        + Add another custom need
-                      </button>
-                    )}
-                    <span className="field-hint">
-                      Up to {needLimits.maxCustomNeeds} custom needs, {needLimits.maxNeedLength} characters each.
-                    </span>
-                  </div>
-                )}
-              </div>
-
               {formError && <div className="form-error">{formError}</div>}
 
               <div className="modal-footer">
@@ -552,7 +325,7 @@ export default function Victims() {
         <div className="modal-overlay" onClick={() => setMoveModal(null)}>
           <div className="modal modal-sm" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Transfer {moveModal.name}</h2>
+              <h2>{moveModal.shelter_id ? 'Transfer' : 'Re-admit'} {moveModal.name}</h2>
               <button className="modal-close" onClick={() => setMoveModal(null)}>×</button>
             </div>
             <div className="modal-form">
@@ -574,7 +347,7 @@ export default function Victims() {
                   disabled={!moveShelter || updatingId === moveModal.victim_id}
                   onClick={() => handleMove(moveModal.victim_id)}
                 >
-                  {updatingId === moveModal.victim_id ? 'Moving...' : 'Transfer'}
+                  {updatingId === moveModal.victim_id ? 'Moving...' : (moveModal.shelter_id ? 'Transfer' : 'Re-admit')}
                 </button>
               </div>
             </div>

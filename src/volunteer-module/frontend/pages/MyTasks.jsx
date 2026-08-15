@@ -3,9 +3,12 @@ import { useSearchParams } from 'react-router-dom';
 import { useVolunteer, volunteerQuery } from '../components/volunteerContext';
 import './MyTasks.css';
 
-// The four KPI cards are the only filter control on this page. Each one filters the
-// list below it using the same parameter the server counts by, so a card can never
-// claim rows the list won't show.
+// The KPI cards are the only filter control on this page. Each one filters the list
+// below it using the same parameter the server counts by, so a card can never claim
+// rows the list won't show.
+//
+// There is no Overdue card: Task has no due_date in the official schema, so there is
+// no deadline for a task to be past.
 const KPI_CARDS = [
   { key: 'pending', label: 'Pending Tasks', tone: 'pending', param: { status: 'PENDING' } },
   { key: 'in_progress', label: 'In Progress', tone: 'in-progress', param: { status: 'IN_PROGRESS' } },
@@ -16,18 +19,11 @@ const KPI_CARDS = [
     param: { view: 'completed_today' },
     note: 'Task has no completion timestamp, so this counts tasks raised today that are now complete.',
   },
-  { key: 'overdue', label: 'Overdue', tone: 'overdue', param: { view: 'overdue' } },
 ];
 
 function formatDate(d) {
   if (!d) return '—';
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-function isOverdue(task) {
-  if (!task.due_date) return false;
-  if (task.status !== 'PENDING' && task.status !== 'IN_PROGRESS') return false;
-  return new Date(task.due_date) < new Date();
 }
 
 function statusLabel(status) {
@@ -43,9 +39,8 @@ export default function MyTasks() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // The selected card lives in the URL, not in state: dashboard alerts deep-link
-  // here as ?view=overdue, and this way back/forward and a shared link all land on
-  // the same filter with nothing to keep in sync.
+  // The selected card lives in the URL, not in state, so back/forward and a shared
+  // link all land on the same filter with nothing to keep in sync.
   const requestedView = searchParams.get('view');
   const activeCard = KPI_CARDS.some((c) => c.key === requestedView) ? requestedView : null;
 
@@ -145,11 +140,10 @@ export default function MyTasks() {
           <div className="task-list">
             {tasks.map(task => {
               const action = quickAction(task);
-              const overdue = isOverdue(task);
               const expanded = expandedTask === task.task_id;
 
               return (
-                <div key={task.task_id} className={`task-card${overdue ? ' is-overdue' : ''}`}>
+                <div key={task.task_id} className="task-card">
                   <div
                     className="task-card-header"
                     onClick={() => setExpandedTask(expanded ? null : task.task_id)}
@@ -160,10 +154,6 @@ export default function MyTasks() {
                       <span className={`status-badge ${task.status.toLowerCase().replace('_', '-')}`}>
                         {statusLabel(task.status)}
                       </span>
-                      {task.priority && (
-                        <span className={`priority-chip ${task.priority.toLowerCase()}`}>{task.priority}</span>
-                      )}
-                      {overdue && <span className="overdue-badge">Overdue</span>}
                     </div>
 
                     <div className="task-meta">
@@ -174,14 +164,14 @@ export default function MyTasks() {
                         </svg>
                         {task.shelter_name || 'Unassigned'}
                       </span>
-                      <span className={`meta-item${overdue ? ' meta-overdue' : ''}`}>
+                      <span className="meta-item">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                           <line x1="16" y1="2" x2="16" y2="6" />
                           <line x1="8" y1="2" x2="8" y2="6" />
                           <line x1="3" y1="10" x2="21" y2="10" />
                         </svg>
-                        {task.due_date ? `Due ${formatDate(task.due_date)}` : 'No due date'}
+                        Raised {formatDate(task.created_at)}
                       </span>
 
                       {action ? (

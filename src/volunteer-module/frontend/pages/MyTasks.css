@@ -65,7 +65,6 @@
 .kpi-card.pending .kpi-value { color: #d97706; }
 .kpi-card.in-progress .kpi-value { color: #2563eb; }
 .kpi-card.completed .kpi-value { color: #16a34a; }
-.kpi-card.overdue .kpi-value { color: #dc2626; }
 
 .kpi-label {
   font-size: 13px;
@@ -270,32 +269,6 @@
   grid-column: 1 / -1;
 }
 
-/* ---- Overdue treatment ---- */
-
-.task-card.is-overdue {
-  border-color: #fecaca;
-}
-
-.task-card.is-overdue:hover {
-  border-color: #f87171;
-}
-
-.overdue-badge {
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  background: #fef2f2;
-  color: #dc2626;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.meta-item.meta-overdue {
-  color: #dc2626;
-  font-weight: 500;
-}
-
 .task-done {
   font-size: 12px;
   font-weight: 500;
@@ -334,18 +307,3 @@
   color: #16a34a;
 }
 
-/* ---- Priority chips ---- */
-
-.priority-chip {
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 10px;
-  font-weight: 600;
-  flex-shrink: 0;
-  text-transform: uppercase;
-}
-
-.priority-chip.urgent { background: #fef2f2; color: #dc2626; }
-.priority-chip.high   { background: #fef3c7; color: #d97706; }
-.priority-chip.medium { background: #eff6ff; color: #2563eb; }
-.priority-chip.low    { background: #f3f4f6; color: #6b7280; }

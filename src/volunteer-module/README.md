@@ -102,11 +102,11 @@ Reads that a newer render can supersede take an `AbortSignal` as a last argument
 | `dashboardController.getDashboard(shelterId?)` | shelter + inventory + active events + alerts + task snapshot, composed |
 | `dashboardController.getMyShelter(shelterId?)` | the shelter on its own, with banded inventory and occupants |
 | **2. Victim registration** | |
-| `victimController.listVictims({ shelterId, status, search, scope })` | the register; `scope: 'mine'` narrows to own registrations |
-| `victimController.getVictimStats({ shelterId, scope })` | headcount by status, same scope as the list |
-| `victimController.getVictimOptions()` | status + special-needs vocabulary and its limits |
-| `victimController.registerVictim(input)` | register an arrival; `specialNeeds[]` accepts custom strings |
-| `victimController.updateVictimStatus(victimId, status)` | field status change |
+| `victimController.listVictims({ shelterId, search, scope })` | the register; `scope: 'mine'` narrows to own registrations |
+| `victimController.getVictimStats({ shelterId, scope })` | headcount, same scope as the list |
+| `victimController.getVictimOptions()` | the gender vocabulary |
+| `victimController.registerVictim(input)` | register an arrival |
+| `victimController.dischargeVictim(victimId)` | clear the shelter and hand the bed back |
 | `victimController.assignVictimShelter(victimId, shelterId)` | move between shelters you cover |
 | **3. Resource requests** | |
 | `resourceRequestController.listRequests({ shelterId, status, scope })` | requests with their line items |
@@ -117,8 +117,8 @@ Reads that a newer render can supersede take an `AbortSignal` as a last argument
 | `resourceRequestController.updateRequest(requestId, { items })` | replace the line items (pending, yours only) |
 | `resourceRequestController.withdrawRequest(requestId)` | mark your pending request REVOKED |
 | **4. Task management** | |
-| `taskController.listTasks({ filter, priority, shelterId })` | `filter` is `''` / `PENDING` / `IN_PROGRESS` / `COMPLETED` / `OVERDUE` |
-| `taskController.getTaskStats()` | the four KPI counters |
+| `taskController.listTasks({ status, view, shelterId })` | `status` is `''` / `PENDING` / `IN_PROGRESS` / `COMPLETED`; `view` is `completed_today` |
+| `taskController.getTaskStats()` | the KPI counters |
 | `taskController.updateTaskStatus(taskId, status)` | field status change; returns `{ task, stats }` |
 | **Shared reads** (`shared/lib/directory.js`) | |
 | `directoryController.listEvents/listAnnouncements/listShelters/listAreas` | public cross-role reads |
@@ -213,15 +213,11 @@ A failure throws a `ControllerError` carrying a semantic `code`
   shelter pick which in the header; the selection lives in `VolunteerContext`,
   so switching on the dashboard is still in effect on the victim register and
   the request list. It resets when the acting volunteer changes.
-- **Special needs are bounded free text.** `Victim.special_needs` is a `TEXT[]`.
-  Tags from the vocabulary in `src/core/victimNeeds.js` pass through as-is;
-  anything else is accepted as a volunteer-authored custom need, because the
-  list cannot anticipate every situation in the field. It is still bounded —
-  trimmed, whitespace-collapsed, `MAX_NEED_LENGTH` characters, de-duplicated
-  case-insensitively, and at most `MAX_CUSTOM_NEEDS` free-text entries — since
-  the array renders straight into the occupant list and the details panel, and
-  one unbounded registration would push a wall of text through every screen
-  that reads it. The limits ship to the client on `/victims/options`.
+- **Presence at a shelter is the admission record.** `Victim` has no `status`
+  column, so a victim occupies a bed exactly while `shelter_id` points at one.
+  Discharging clears `shelter_id` rather than deleting the row, which hands the
+  bed back while keeping the registration visible to the admin event counts and
+  the public victim lookup. Re-admitting is the same operation as a transfer.
 - **A custom resource becomes a real catalogue row.**
   `ResourceRequestItem.resource_id` is a foreign key, so a custom item cannot be
   a loose string on the request — `resolveCustomResource()` reuses an existing
@@ -234,9 +230,8 @@ A failure throws a `ControllerError` carrying a semantic `code`
   to the same id, the duplicate check runs again after resolution.
 - **Supply banding.** Under 1 day of cover is `CRITICAL`, under 3 is `LOW`, else
   `SUFFICIENT`. Rates per person per day live in `src/core/needLevel.js`. Use
-  `<SupplyBadge>` rather than `<StatusBadge>` for these: `LOW` means opposite
-  things in the two vocabularies that use it — a low-priority task is calm, a
-  low supply line is a warning.
+  `<SupplyBadge>` rather than `<StatusBadge>` for these: a low supply line is a
+  warning, not a calm state.
 - **Availability banding.** `CLOSED` as recorded, `OVERCROWDED` at or above 90%
   of capacity, else `NORMAL`. Derived, not stored.
 
@@ -263,23 +258,35 @@ Seeded volunteers (all accounts use `Password123!`):
 
 ## Schema note
 
-Five columns and two enums were added for this module. All are additive and
-defaulted, so no other role module needs to change — but `schema.sql` is
-shared, so tell the team before merging. Resource requests needed **no** schema
-change: `ResourceRequest.created_by` already references `Volunteer`, so raising
-one is a volunteer action by design.
+**This module adds no columns and no enums.** It runs on the official shared
+schema — the `RescueNet Local Database Boostrap.sql` the team distributes,
+exactly as issued — and is verified against a database built from that file
+alone. An earlier draft of this module assumed `Task.priority`,
+`Task.due_date`, `Victim.status`, `Victim.special_needs`,
+`Victim.contact_number` and `Resource.custom_category`; none of those exist,
+and every one has been removed rather than migrated in — the bootstrap is
+shared, and a migration is a change every other role module has to run.
 
-| Object | Definition |
+If you previously ran `migrations/001_resource_type_other.sql` (now deleted),
+your database still has an unused `Resource.custom_category` column and an
+`OTHER` value on `resource_type`. Both are harmless: no code reads or writes
+either, and nothing new is ever filed under `OTHER`.
+
+What that costs, and what replaced it:
+
+| Removed | Consequence |
 | --- | --- |
-| `task_priority` | enum `LOW / MEDIUM / HIGH / URGENT` |
-| `Task.priority` | `task_priority NOT NULL DEFAULT 'MEDIUM'` |
-| `Task.due_date` | `TIMESTAMP NULL` |
-| `victim_status` | enum `CHECKED_IN / MEDICAL_ATTENTION / TRANSFERRED / DISCHARGED` |
-| `Victim.status` | `victim_status NOT NULL DEFAULT 'CHECKED_IN'` |
-| `Victim.special_needs` | `TEXT[] NOT NULL DEFAULT '{}'` |
-| `Victim.contact_number` | `VARCHAR(20)` |
+| `Task.priority` | no priority chips, no priority ordering — tasks sort by status then `created_at` |
+| `Task.due_date` | no due dates, no Overdue KPI, no overdue alert on the dashboard |
+| `Victim.status` | discharge clears `shelter_id`; the medical-attention state is gone |
+| `Victim.special_needs` | removed outright — `Victim` has no free-text column to fold it into |
+| `Victim.contact_number` | removed; the register searches by name only |
+| `Resource.custom_category` | a custom item files under one of the four `resource_type_enum` values |
+
+Resource requests needed **no** schema change of any kind:
+`ResourceRequest.created_by` already references `Volunteer`, so raising one is a
+volunteer action by design.
 
 Every timestamp column is `timestamp WITHOUT time zone`. Write local timestamp
-strings via `toLocalTimestamp()` in `src/core/http.js`, never `toISOString()` —
-a UTC string loses its offset on the way in and comes back hours adrift, which
-silently flips "Due today" into "Overdue".
+strings, never `toISOString()` — a UTC string loses its offset on the way in and
+comes back hours adrift.

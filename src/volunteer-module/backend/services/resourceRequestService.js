@@ -12,12 +12,11 @@ const REQUEST_COLUMNS = `
 const ITEMS_SUBQUERY = `
   COALESCE((
     SELECT json_agg(json_build_object(
-             'resource_id',     r.resource_id,
-             'name',            r.name,
-             'type',            r.type,
-             'custom_category', r.custom_category,
-             'unit',            r.unit,
-             'quantity',        rri.quantity
+             'resource_id', r.resource_id,
+             'name',        r.name,
+             'type',        r.type,
+             'unit',        r.unit,
+             'quantity',    rri.quantity
            ) ORDER BY r.type, r.name)
       FROM ResourceRequestItem rri
       JOIN Resource r ON r.resource_id = rri.resource_id
@@ -194,7 +193,7 @@ export async function withdrawRequest(volunteerId, requestId) {
 
 export async function listResources() {
   const { rows } = await pool.query(
-    `SELECT resource_id, type, name, unit, custom_category FROM Resource ORDER BY type, name`
+    `SELECT resource_id, type, name, unit FROM Resource ORDER BY type, name`
   );
   return rows;
 }
@@ -256,9 +255,10 @@ async function insertItems(client, requestId, items) {
 }
 
 // Reuses the catalogue row a custom line resolves to, so asking for the same thing
-// twice doesn't litter Resource with duplicates. An existing row keeps its own
-// custom_category — a request form has no business rewriting the catalogue.
-async function resolveCustomResource(client, { category, name, unit, customCategory }) {
+// twice doesn't litter Resource with duplicates. The category must be one of the four
+// resource_type_enum values — the official Resource table has no free-text category
+// column to carry anything else.
+async function resolveCustomResource(client, { category, name, unit }) {
   const existing = await client.query(
     `SELECT resource_id FROM Resource WHERE type = $1 AND lower(name) = lower($2) LIMIT 1`,
     [category, name]
@@ -268,9 +268,9 @@ async function resolveCustomResource(client, { category, name, unit, customCateg
   }
 
   const created = await client.query(
-    `INSERT INTO Resource (type, name, unit, custom_category)
-     VALUES ($1, $2, $3, $4) RETURNING resource_id`,
-    [category, name, unit, customCategory ?? null]
+    `INSERT INTO Resource (type, name, unit)
+     VALUES ($1, $2, $3) RETURNING resource_id`,
+    [category, name, unit]
   );
   return created.rows[0].resource_id;
 }
