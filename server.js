@@ -38,7 +38,7 @@ import {
 } from './src/admin-module/backend/controllers/userController.js';
 import { getDashboard, getProfile, getMyShelter, getAssignedShelters } from './src/volunteer-module/backend/controllers/dashboardController.js';
 import { listTasks, getTaskStats, updateTaskStatus as volunteerUpdateTaskStatus } from './src/volunteer-module/backend/controllers/taskController.js';
-import { registerVictim, listVictims, getVictimStats, updateVictimStatus, assignVictimShelter, getVictimOptions } from './src/volunteer-module/backend/controllers/victimController.js';
+import { registerVictim, listVictims, getVictimStats, dischargeVictim, assignVictimShelter, getVictimOptions } from './src/volunteer-module/backend/controllers/victimController.js';
 import { listRequests, getRequestStats, getRequest, createRequest, updateRequest, withdrawRequest, listResources, listRequestableEvents, getRequestOptions } from './src/volunteer-module/backend/controllers/resourceRequestController.js';
 
 const app = express();
@@ -109,7 +109,7 @@ app.get('/api/volunteer/victims', listVictims);
 app.get('/api/volunteer/victims/stats', getVictimStats);
 app.get('/api/volunteer/victims/options', getVictimOptions);
 app.post('/api/volunteer/victims', registerVictim);
-app.put('/api/volunteer/victims/:id/status', updateVictimStatus);
+app.put('/api/volunteer/victims/:id/discharge', dischargeVictim);
 app.put('/api/volunteer/victims/:id/shelter', assignVictimShelter);
 
 app.get('/api/volunteer/requests', listRequests);

@@ -193,12 +193,6 @@ export default function Dashboard() {
                 <span className="task-stat-val">{stats.completed || 0}</span>
                 <span className="task-stat-lbl">Completed</span>
               </div>
-              {(stats.overdue || 0) > 0 && (
-                <div className="task-stat overdue">
-                  <span className="task-stat-val">{stats.overdue}</span>
-                  <span className="task-stat-lbl">Overdue</span>
-                </div>
-              )}
             </div>
             {upcoming.length > 0 && (
               <div className="upcoming-tasks">
@@ -209,10 +203,9 @@ export default function Dashboard() {
                     <div className="upcoming-task-info">
                       <div className="upcoming-task-title">{t.title}</div>
                       <div className="upcoming-task-meta">
-                        {t.shelter_name} {t.due_date ? `· Due ${formatDate(t.due_date)}` : ''}
+                        {[t.shelter_name, `Raised ${formatDate(t.created_at)}`].filter(Boolean).join(' · ')}
                       </div>
                     </div>
-                    <span className={`priority-chip ${t.priority?.toLowerCase()}`}>{t.priority}</span>
                   </div>
                 ))}
               </div>

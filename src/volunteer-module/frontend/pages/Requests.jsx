@@ -11,59 +11,38 @@ const STATUS_LABELS = {
   REVOKED: 'Revoked',
 };
 
-// Sentinel for the "Other / Custom..." choice in both the category and the item
-// dropdown. Real categories are resource_type enum values.
+// Sentinel for the "Other / Custom..." choice in the item dropdown — an item that is
+// not in the catalogue yet. It still has to be filed under one of the four
+// resource_type_enum categories; the schema has no free-text category to invent one.
 const CUSTOM = '__custom__';
-const CUSTOM_PREFIX = 'custom:';
 
 const CATEGORY_LABELS = {
   WATER: 'Water',
   FOOD: 'Food',
   MEDICINE: 'Medicine',
   HYGIENE: 'Hygiene',
-  OTHER: 'Uncategorised',
 };
 
 const EMPTY_ITEM = {
   category: '',
   resourceId: '',
   quantity: '1',
-  customCategory: '',
   customName: '',
   customUnit: '',
 };
 
 function categoryLabel(value) {
-  if (value.startsWith(CUSTOM_PREFIX)) return value.slice(CUSTOM_PREFIX.length);
   return CATEGORY_LABELS[value] || value;
 }
 
-/** A line needs typed item details when either dropdown is on "Other / Custom...". */
+/** A line needs typed item details when the item dropdown is on "Other / Custom...". */
 function needsCustomItem(line) {
-  return line.category === CUSTOM || line.resourceId === CUSTOM;
-}
-
-/**
- * Every custom category lands in the enum's OTHER bucket; the wording the volunteer
- * typed rides alongside it in Resource.custom_category so it isn't flattened away.
- */
-function categoryParts(line) {
-  if (line.category === CUSTOM) {
-    return { category: 'OTHER', customCategory: line.customCategory.trim() };
-  }
-  if (line.category.startsWith(CUSTOM_PREFIX)) {
-    return { category: 'OTHER', customCategory: line.category.slice(CUSTOM_PREFIX.length) };
-  }
-  return { category: line.category, customCategory: null };
+  return line.resourceId === CUSTOM;
 }
 
 /** Catalogue items available under the category picked on this line. */
 function itemsForCategory(line, resources) {
-  if (!line.category || line.category === CUSTOM) return [];
-  if (line.category.startsWith(CUSTOM_PREFIX)) {
-    const label = line.category.slice(CUSTOM_PREFIX.length);
-    return resources.filter((r) => r.type === 'OTHER' && r.custom_category === label);
-  }
+  if (!line.category) return [];
   return resources.filter((r) => r.type === line.category);
 }
 
@@ -133,9 +112,7 @@ export default function Requests() {
       eventId: req.event_id,
       items: (req.items || []).map((i) => ({
         ...EMPTY_ITEM,
-        category: i.type === 'OTHER' && i.custom_category
-          ? `${CUSTOM_PREFIX}${i.custom_category}`
-          : i.type,
+        category: i.type,
         resourceId: i.resource_id,
         quantity: String(i.quantity),
       })),
@@ -163,7 +140,6 @@ export default function Requests() {
           next.resourceId = '';
           next.customName = '';
           next.customUnit = '';
-          if (value !== CUSTOM) next.customCategory = '';
         }
         if (key === 'resourceId' && value !== CUSTOM) {
           next.customName = '';
@@ -184,9 +160,6 @@ export default function Requests() {
       const line = index + 1;
       const qty = parseInt(item.quantity, 10);
       if (!item.category) { setFormError(`Line ${line}: choose a category`); return; }
-      if (item.category === CUSTOM && !item.customCategory.trim()) {
-        setFormError(`Line ${line}: name the custom category`); return;
-      }
       if (needsCustomItem(item)) {
         if (!item.customName.trim()) { setFormError(`Line ${line}: name the custom item`); return; }
         if (!item.customUnit.trim()) { setFormError(`Line ${line}: give the custom item a unit`); return; }
@@ -205,12 +178,10 @@ export default function Requests() {
         items: form.items.map((item) => {
           const quantity = parseInt(item.quantity, 10);
           if (!needsCustomItem(item)) return { resourceId: item.resourceId, quantity };
-          const { category, customCategory } = categoryParts(item);
           return {
             quantity,
             custom: {
-              category,
-              customCategory,
+              category: item.category,
               name: item.customName.trim(),
               unit: item.customUnit.trim(),
             },
@@ -245,13 +216,6 @@ export default function Requests() {
   }
 
   const standardCategories = options?.categories || [];
-  // Custom categories already in the catalogue become reusable picks, so the second
-  // volunteer asking for "Equipment" doesn't have to retype it.
-  const customCategories = [...new Set(
-    (options?.resources || [])
-      .filter((r) => r.type === 'OTHER' && r.custom_category)
-      .map((r) => r.custom_category)
-  )].sort();
 
   async function handleWithdraw(requestId) {
     if (!window.confirm('Withdraw this request? This cannot be undone.')) return;
@@ -357,7 +321,7 @@ export default function Requests() {
                       {(req.items || []).map((item, i) => (
                         <div key={i} className="item-row">
                           <span className={`type-chip ${item.type?.toLowerCase()}`}>
-                            {item.custom_category || CATEGORY_LABELS[item.type] || item.type}
+                            {CATEGORY_LABELS[item.type] || item.type}
                           </span>
                           <span className="item-name">{item.name}</span>
                           <span className="item-qty">{item.quantity} {item.unit}</span>
@@ -438,7 +402,6 @@ export default function Requests() {
                 </div>
 
                 {form.items.map((item, idx) => {
-                  const categoryIsCustom = item.category === CUSTOM;
                   const catalogue = itemsForCategory(item, options?.resources || []);
 
                   return (
@@ -453,32 +416,24 @@ export default function Requests() {
                           {standardCategories.map((c) => (
                             <option key={c} value={c}>{categoryLabel(c)}</option>
                           ))}
-                          {customCategories.map((c) => (
-                            <option key={c} value={`${CUSTOM_PREFIX}${c}`}>{c}</option>
+                        </select>
+
+                        <select
+                          value={item.resourceId}
+                          onChange={(e) => updateItem(idx, 'resourceId', e.target.value)}
+                          disabled={!item.category}
+                          aria-label={`Line ${idx + 1} item`}
+                        >
+                          <option value="">
+                            {item.category ? 'Select item' : 'Pick a category first'}
+                          </option>
+                          {catalogue.map((r) => (
+                            <option key={r.resource_id} value={r.resource_id}>
+                              {r.name} ({r.unit})
+                            </option>
                           ))}
                           <option value={CUSTOM}>Other / Custom...</option>
                         </select>
-
-                        {categoryIsCustom ? (
-                          <span className="item-custom-hint">Custom item details below</span>
-                        ) : (
-                          <select
-                            value={item.resourceId}
-                            onChange={(e) => updateItem(idx, 'resourceId', e.target.value)}
-                            disabled={!item.category}
-                            aria-label={`Line ${idx + 1} item`}
-                          >
-                            <option value="">
-                              {item.category ? 'Select item' : 'Pick a category first'}
-                            </option>
-                            {catalogue.map((r) => (
-                              <option key={r.resource_id} value={r.resource_id}>
-                                {r.name} ({r.unit})
-                              </option>
-                            ))}
-                            <option value={CUSTOM}>Other / Custom...</option>
-                          </select>
-                        )}
 
                         <input
                           type="number"
@@ -499,17 +454,8 @@ export default function Requests() {
                         </button>
                       </div>
 
-                      {(categoryIsCustom || needsCustomItem(item)) && (
+                      {needsCustomItem(item) && (
                         <div className="custom-fields">
-                          {categoryIsCustom && (
-                            <input
-                              type="text"
-                              maxLength={60}
-                              value={item.customCategory}
-                              placeholder="Custom category, e.g. Equipment"
-                              onChange={(e) => updateItem(idx, 'customCategory', e.target.value)}
-                            />
-                          )}
                           <input
                             type="text"
                             maxLength={60}

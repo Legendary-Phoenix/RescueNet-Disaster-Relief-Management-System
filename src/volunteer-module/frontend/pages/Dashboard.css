@@ -354,7 +354,6 @@
 .task-stat.pending .task-stat-val { color: #d97706; }
 .task-stat.in-progress .task-stat-val { color: #2563eb; }
 .task-stat.completed .task-stat-val { color: #16a34a; }
-.task-stat.overdue .task-stat-val { color: #dc2626; }
 
 /* ---- Upcoming tasks ---- */
 
@@ -416,19 +415,6 @@
 .status-dot.in-progress { background: #2563eb; }
 .status-dot.completed { background: #16a34a; }
 .status-dot.revoked { background: #9ca3af; }
-
-.priority-chip {
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 10px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.priority-chip.urgent { background: #fef2f2; color: #dc2626; }
-.priority-chip.high { background: #fef3c7; color: #d97706; }
-.priority-chip.medium { background: #eff6ff; color: #2563eb; }
-.priority-chip.low { background: #f3f4f6; color: #6b7280; }
 
 /* ---- Announcements ---- */
 

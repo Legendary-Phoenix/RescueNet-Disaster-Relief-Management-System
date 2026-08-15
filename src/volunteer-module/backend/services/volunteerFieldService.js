@@ -1,7 +1,11 @@
 import pool from '../../../db.js';
 
-function occupiesBed(status) {
-  return status === 'CHECKED_IN' || status === 'MEDICAL_ATTENTION';
+// Victim has no status column in the official schema, so presence at a shelter is the
+// only admission signal there is: a victim occupies a bed exactly while shelter_id
+// points at one. Discharging clears shelter_id rather than deleting the record, which
+// keeps the registration visible to the admin counts and the public victim lookup.
+function occupiesBed(shelterId) {
+  return shelterId != null;
 }
 
 function daysOfCover(type, quantity, occupancy) {
@@ -54,11 +58,11 @@ export async function getProfile(volunteerId) {
 // table alias passed in ('t.' for the list query, '' for the aggregate).
 //
 // completedToday is an approximation: Task has no completed_at column, so the closest
-// available answer is "raised today and now COMPLETED". Tightening it needs a schema
-// column, which is a shared migration — see src/volunteer-module/migrations/.
+// available answer is "raised today and now COMPLETED".
+//
+// There is no 'overdue' view: the official schema has no Task.due_date, so a task has
+// no deadline to be past. Ordering and the KPI row drop it with the column.
 export const TASK_VIEWS = {
-  overdue: (a = '') =>
-    `${a}status IN ('PENDING','IN_PROGRESS') AND ${a}due_date IS NOT NULL AND ${a}due_date < CURRENT_TIMESTAMP`,
   completed_today: (a = '') =>
     `${a}status = 'COMPLETED' AND ${a}created_at::date = CURRENT_DATE`,
 };
@@ -83,7 +87,7 @@ export async function listMyTasks(volunteerId, { status, shelterId, view } = {})
   }
 
   const { rows } = await pool.query(
-    `SELECT t.task_id, t.title, t.description, t.status, t.priority, t.due_date, t.created_at,
+    `SELECT t.task_id, t.title, t.description, t.status, t.created_at,
             t.shelter_id, t.event_id,
             s.name AS shelter_name,
             e.name AS event_name, e.severity AS event_severity,
@@ -95,8 +99,6 @@ export async function listMyTasks(volunteerId, { status, shelterId, view } = {})
       WHERE ${conditions.join(' AND ')}
       ORDER BY
         CASE t.status WHEN 'IN_PROGRESS' THEN 0 WHEN 'PENDING' THEN 1 ELSE 2 END,
-        CASE t.priority WHEN 'URGENT' THEN 0 WHEN 'HIGH' THEN 1 WHEN 'MEDIUM' THEN 2 ELSE 3 END,
-        t.due_date NULLS LAST,
         t.created_at DESC`,
     params
   );
@@ -118,8 +120,7 @@ export async function getMyTaskStats(volunteerId, { shelterId } = {}) {
        count(*) FILTER (WHERE status = 'IN_PROGRESS')::int                AS in_progress,
        count(*) FILTER (WHERE status = 'COMPLETED')::int                  AS completed,
        count(*) FILTER (WHERE status = 'REVOKED')::int                    AS revoked,
-       count(*) FILTER (WHERE ${TASK_VIEWS.completed_today()})::int       AS completed_today,
-       count(*) FILTER (WHERE ${TASK_VIEWS.overdue()})::int               AS overdue
+       count(*) FILTER (WHERE ${TASK_VIEWS.completed_today()})::int       AS completed_today
      FROM Task WHERE ${conditions.join(' AND ')}`,
     params
   );
@@ -238,7 +239,7 @@ export async function getDashboard(volunteerId, shelterId) {
     events: [],
     tasks: { stats: taskStats, upcoming: [] },
     requests: null,
-    alerts: buildTaskAlerts(taskStats),
+    alerts: [],
     announcements: announcements.rows,
   };
   if (shelters.length === 0) return emptyResult;
@@ -261,10 +262,7 @@ export async function getDashboard(volunteerId, shelterId) {
   // Name the shelter in the message only when there is more than one on screen,
   // otherwise every alert repeats a name the panel above already shows.
   const nameThem = shelters.length > 1;
-  const alerts = [
-    ...shelters.flatMap((s) => buildShelterAlerts(s, nameThem)),
-    ...buildTaskAlerts(taskStats),
-  ];
+  const alerts = shelters.flatMap((s) => buildShelterAlerts(s, nameThem));
 
   return {
     shelters,
@@ -323,18 +321,9 @@ function buildShelterAlerts(shelter, nameThem) {
   return alerts;
 }
 
-function buildTaskAlerts(taskStats) {
-  if (!taskStats.overdue) return [];
-  return [{
-    level: 'WARNING',
-    message: `${taskStats.overdue} task(s) past their due date.`,
-    action: { label: 'View overdue tasks', to: '/volunteer/tasks?view=overdue' },
-  }];
-}
-
 // ── Victims ──────────────────────────────────────────────────────────────────
 
-export async function registerVictim(volunteerId, { name, age, gender, contactNumber, shelterId, eventId, status, specialNeeds }) {
+export async function registerVictim(volunteerId, { name, age, gender, shelterId, eventId }) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -364,20 +353,17 @@ export async function registerVictim(volunteerId, { name, age, gender, contactNu
       throw Object.assign(new Error('Cannot register victims against a resolved disaster event'), { status: 400 });
     }
 
-    const resolvedStatus = status || 'CHECKED_IN';
     const { rows } = await client.query(
-      `INSERT INTO Victim (name, age, gender, contact_number, status, special_needs, shelter_id, event_id, registered_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING victim_id, name, age, gender, contact_number, status, special_needs, registered_at`,
-      [name, age ?? null, gender ?? null, contactNumber ?? null, resolvedStatus, specialNeeds ?? [], shelterId, eventId, volunteerId]
+      `INSERT INTO Victim (name, age, gender, shelter_id, event_id, registered_by)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING victim_id, name, age, gender, shelter_id, event_id, registered_at`,
+      [name, age ?? null, gender ?? null, shelterId, eventId, volunteerId]
     );
 
-    if (occupiesBed(resolvedStatus)) {
-      await client.query(
-        `UPDATE Shelter SET current_occupancy = current_occupancy + 1 WHERE shelter_id = $1`,
-        [shelterId]
-      );
-    }
+    await client.query(
+      `UPDATE Shelter SET current_occupancy = current_occupancy + 1 WHERE shelter_id = $1`,
+      [shelterId]
+    );
 
     await client.query('COMMIT');
     return rows[0];
@@ -389,7 +375,10 @@ export async function registerVictim(volunteerId, { name, age, gender, contactNu
   }
 }
 
-export async function listVictims(volunteerId, { shelterId, status, search, scope } = {}) {
+// Victim has no status column, so a discharged victim is simply one with no shelter.
+// Under the default scope that drops them out of the shelter register, which is the
+// point; scope 'mine' still lists them, with a null shelter_name.
+export async function listVictims(volunteerId, { shelterId, search, scope } = {}) {
   const params = [volunteerId];
   const conditions = [];
 
@@ -403,17 +392,13 @@ export async function listVictims(volunteerId, { shelterId, status, search, scop
     params.push(shelterId);
     conditions.push(`v.shelter_id = $${params.length}`);
   }
-  if (status) {
-    params.push(status);
-    conditions.push(`v.status = $${params.length}`);
-  }
   if (search) {
     params.push(`%${search}%`);
-    conditions.push(`(v.name ILIKE $${params.length} OR v.contact_number ILIKE $${params.length})`);
+    conditions.push(`v.name ILIKE $${params.length}`);
   }
 
   const { rows } = await pool.query(
-    `SELECT v.victim_id, v.name, v.age, v.gender, v.contact_number, v.status, v.special_needs,
+    `SELECT v.victim_id, v.name, v.age, v.gender,
             v.registered_at, v.shelter_id, v.event_id,
             vol.name AS registered_by_name,
             s.name AS shelter_name, e.name AS event_name
@@ -422,9 +407,7 @@ export async function listVictims(volunteerId, { shelterId, status, search, scop
        LEFT JOIN Shelter s       ON s.shelter_id     = v.shelter_id
        LEFT JOIN DisasterEvent e ON e.event_id       = v.event_id
       WHERE ${conditions.join(' AND ')}
-      ORDER BY
-        CASE v.status WHEN 'MEDICAL_ATTENTION' THEN 0 WHEN 'CHECKED_IN' THEN 1 ELSE 2 END,
-        v.registered_at DESC`,
+      ORDER BY v.registered_at DESC`,
     params
   );
   return rows;
@@ -445,65 +428,55 @@ export async function getVictimStats(volunteerId, { shelterId, scope } = {}) {
     conditions.push(`shelter_id = $${params.length}`);
   }
 
+  // The status breakdown (checked in / medical / transferred / discharged) came from
+  // Victim.status, which the official schema does not have. What is left is who is on
+  // the register and how much of it this volunteer put there.
   const { rows } = await pool.query(
     `SELECT
-       count(*) FILTER (WHERE status = 'CHECKED_IN')::int        AS checked_in,
-       count(*) FILTER (WHERE status = 'MEDICAL_ATTENTION')::int AS medical_attention,
-       count(*) FILTER (WHERE status = 'TRANSFERRED')::int       AS transferred,
-       count(*) FILTER (WHERE status = 'DISCHARGED')::int        AS discharged,
-       count(*) FILTER (WHERE registered_by = $1)::int           AS registered_by_me,
-       count(*)::int                                              AS total
+       count(*) FILTER (WHERE registered_by = $1)::int AS registered_by_me,
+       count(*)::int                                   AS total
      FROM Victim WHERE ${conditions.join(' AND ')}`,
     params
   );
   return rows[0];
 }
 
-export async function updateVictimStatus(volunteerId, victimId, status) {
+// Discharge clears the shelter rather than deleting the Victim row: the registration
+// stays on record for the admin event counts and the public victim lookup, and the bed
+// is handed back. Without Victim.status this is the only way to leave a shelter.
+export async function dischargeVictim(volunteerId, victimId) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
 
     const existing = await client.query(
-      `SELECT victim_id, shelter_id, status FROM Victim WHERE victim_id = $1`,
+      `SELECT victim_id, shelter_id FROM Victim WHERE victim_id = $1`,
       [victimId]
     );
     if (existing.rows.length === 0) throw Object.assign(new Error('Victim not found'), { status: 404 });
 
     const victim = existing.rows[0];
+    if (!occupiesBed(victim.shelter_id)) {
+      throw Object.assign(new Error('This victim has already been discharged'), { status: 409 });
+    }
+
     const asgn = await client.query(
       `SELECT 1 FROM VolunteerShelterAssignment WHERE volunteer_id = $1 AND shelter_id = $2`,
       [volunteerId, victim.shelter_id]
     );
     if (asgn.rows.length === 0) {
-      throw Object.assign(new Error('You can only update victims at a shelter you are assigned to'), { status: 403 });
-    }
-    if (victim.status === status) {
-      throw Object.assign(new Error(`This victim is already ${status.replace('_', ' ').toLowerCase()}`), { status: 409 });
+      throw Object.assign(new Error('You can only discharge victims at a shelter you are assigned to'), { status: 403 });
     }
 
-    const was = occupiesBed(victim.status);
-    const now = occupiesBed(status);
-
-    if (was !== now) {
-      const shl = await client.query(
-        `SELECT capacity, current_occupancy FROM Shelter WHERE shelter_id = $1 FOR UPDATE`,
-        [victim.shelter_id]
-      );
-      if (now && shl.rows[0].current_occupancy >= shl.rows[0].capacity) {
-        throw Object.assign(new Error('This shelter is at full capacity and cannot re-admit'), { status: 409 });
-      }
-      const delta = now ? 1 : -1;
-      await client.query(
-        `UPDATE Shelter SET current_occupancy = GREATEST(0, current_occupancy + $1) WHERE shelter_id = $2`,
-        [delta, victim.shelter_id]
-      );
-    }
+    await client.query(
+      `UPDATE Shelter SET current_occupancy = GREATEST(0, current_occupancy - 1) WHERE shelter_id = $1`,
+      [victim.shelter_id]
+    );
 
     const { rows } = await client.query(
-      `UPDATE Victim SET status = $1 WHERE victim_id = $2
-       RETURNING victim_id, name, status, shelter_id`,
-      [status, victimId]
+      `UPDATE Victim SET shelter_id = NULL WHERE victim_id = $1
+       RETURNING victim_id, name, shelter_id`,
+      [victimId]
     );
     await client.query('COMMIT');
     return rows[0];
@@ -521,7 +494,7 @@ export async function assignVictimToShelter(volunteerId, victimId, shelterId) {
     await client.query('BEGIN');
 
     const existing = await client.query(
-      `SELECT victim_id, name, shelter_id, status FROM Victim WHERE victim_id = $1`,
+      `SELECT victim_id, name, shelter_id FROM Victim WHERE victim_id = $1`,
       [victimId]
     );
     if (existing.rows.length === 0) throw Object.assign(new Error('Victim not found'), { status: 404 });
@@ -541,29 +514,32 @@ export async function assignVictimToShelter(volunteerId, victimId, shelterId) {
       throw Object.assign(new Error('You can only move a victim between shelters you are assigned to'), { status: 403 });
     }
 
-    if (occupiesBed(victim.status)) {
-      const ids = [victim.shelter_id, shelterId].sort();
-      const locked = await client.query(
-        `SELECT shelter_id, capacity, current_occupancy, status FROM Shelter
-          WHERE shelter_id = ANY($1::uuid[]) ORDER BY shelter_id FOR UPDATE`,
-        [ids]
-      );
-      const dest = locked.rows.find((r) => r.shelter_id === shelterId);
-      if (dest.status === 'CLOSED') throw Object.assign(new Error('That shelter is closed'), { status: 400 });
-      if (dest.current_occupancy >= dest.capacity) throw Object.assign(new Error('That shelter is at full capacity'), { status: 409 });
+    // The victim always takes a bed at the destination, so the destination is checked
+    // every time. The source is only given a bed back if they were actually in one —
+    // a discharged victim (shelter_id NULL) is being re-admitted, not moved.
+    const ids = [victim.shelter_id, shelterId].filter(Boolean).sort();
+    const locked = await client.query(
+      `SELECT shelter_id, capacity, current_occupancy, status FROM Shelter
+        WHERE shelter_id = ANY($1::uuid[]) ORDER BY shelter_id FOR UPDATE`,
+      [ids]
+    );
+    const dest = locked.rows.find((r) => r.shelter_id === shelterId);
+    if (dest.status === 'CLOSED') throw Object.assign(new Error('That shelter is closed'), { status: 400 });
+    if (dest.current_occupancy >= dest.capacity) throw Object.assign(new Error('That shelter is at full capacity'), { status: 409 });
 
+    if (occupiesBed(victim.shelter_id)) {
       await client.query(
         `UPDATE Shelter SET current_occupancy = GREATEST(0, current_occupancy - 1) WHERE shelter_id = $1`,
         [victim.shelter_id]
       );
-      await client.query(
-        `UPDATE Shelter SET current_occupancy = current_occupancy + 1 WHERE shelter_id = $1`,
-        [shelterId]
-      );
     }
+    await client.query(
+      `UPDATE Shelter SET current_occupancy = current_occupancy + 1 WHERE shelter_id = $1`,
+      [shelterId]
+    );
 
     const { rows } = await client.query(
-      `UPDATE Victim SET shelter_id = $1 WHERE victim_id = $2 RETURNING victim_id, name, shelter_id, status`,
+      `UPDATE Victim SET shelter_id = $1 WHERE victim_id = $2 RETURNING victim_id, name, shelter_id`,
       [shelterId, victimId]
     );
     await client.query('COMMIT');

@@ -1,6 +1,8 @@
 import * as requestService from '../services/resourceRequestService.js';
 
-const CATEGORIES = ['WATER', 'FOOD', 'MEDICINE', 'HYGIENE', 'OTHER'];
+// Mirrors resource_type_enum exactly. There is no 'OTHER' — the official schema has
+// neither the enum value nor a column to store a typed-in category name.
+const CATEGORIES = ['WATER', 'FOOD', 'MEDICINE', 'HYGIENE'];
 const MAX_ITEMS = 20;
 const MAX_TEXT_LENGTH = 60;
 
@@ -15,8 +17,8 @@ function boundedText(value, label, line) {
 
 /**
  * A line is either a catalogue pick ({ resourceId }) or a custom one
- * ({ custom: { category, name, unit, customCategory } }). A custom category is
- * carried as category 'OTHER' plus the wording the volunteer typed.
+ * ({ custom: { category, name, unit } }) — an item not yet in the catalogue, filed
+ * under one of the four resource categories.
  */
 function parseItems(value) {
   if (!Array.isArray(value) || value.length === 0) {
@@ -44,9 +46,6 @@ function parseItems(value) {
           category,
           name: boundedText(item.custom.name, 'item name', line),
           unit: boundedText(item.custom.unit, 'unit', line),
-          customCategory: item.custom.customCategory
-            ? boundedText(item.custom.customCategory, 'custom category', line)
-            : null,
         },
       };
     }
