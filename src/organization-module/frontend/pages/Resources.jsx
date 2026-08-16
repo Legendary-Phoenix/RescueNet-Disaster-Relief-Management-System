@@ -5,6 +5,8 @@ import './Resources.css';
 const RESOURCE_TYPES = ['All types', 'WATER', 'FOOD', 'MEDICINE', 'HYGIENE'];
 const TYPE_LABELS = { WATER: 'Water & Drinks', FOOD: 'Food', MEDICINE: 'Medicine', HYGIENE: 'Hygiene' };
 const REQUEST_STATUSES = ['All', 'Pending', 'Approved', 'Fulfilled', 'Rejected', 'Revoked'];
+const NEED_LEVELS = ['All levels', 'LOW', 'MODERATE', 'HIGH', 'CRITICAL'];
+const NEED_COLORS = { LOW: '#16a34a', MODERATE: '#d97706', HIGH: '#ea580c', CRITICAL: '#dc2626' };
 
 function formatDate(d) {
   if (!d) return '—';
@@ -43,7 +45,7 @@ export default function Resources() {
 
       {tab === 'inventory'
         ? <InventoryTab shelters={shelters} resources={resources} prefilterShelter={searchParams.get('shelter') || ''} />
-        : <RequestsTab shelters={shelters} events={events} volunteers={volunteers} />
+        : <RequestsTab shelters={shelters} events={events} volunteers={volunteers} prefilterShelter={searchParams.get('shelter') || ''} />
       }
     </div>
   );
@@ -54,20 +56,20 @@ function InventoryTab({ shelters, resources, prefilterShelter }) {
   const [loading, setLoading] = useState(true);
   const [shelterFilter, setShelterFilter] = useState(prefilterShelter);
   const [typeFilter, setTypeFilter] = useState('All types');
-  const [lowStockOnly, setLowStockOnly] = useState(false);
+  const [needLevelFilter, setNeedLevelFilter] = useState('All levels');
   const [modal, setModal] = useState(null);
   const [formData, setFormData] = useState({});
   const [formError, setFormError] = useState('');
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { fetchInventory(); }, [shelterFilter, typeFilter, lowStockOnly]);
+  useEffect(() => { fetchInventory(); }, [shelterFilter, typeFilter, needLevelFilter]);
 
   async function fetchInventory() {
     setLoading(true);
     const params = new URLSearchParams();
     if (shelterFilter) params.set('shelter', shelterFilter);
     if (typeFilter !== 'All types') params.set('type', typeFilter);
-    if (lowStockOnly) params.set('lowStock', 'true');
+    if (needLevelFilter !== 'All levels') params.set('needLevel', needLevelFilter);
     const res = await fetch(`/api/organization/inventory?${params}`);
     setInventory(await res.json());
     setLoading(false);
@@ -140,10 +142,9 @@ function InventoryTab({ shelters, resources, prefilterShelter }) {
               </button>
             ))}
           </div>
-          <label className="low-stock-toggle">
-            <input type="checkbox" checked={lowStockOnly} onChange={e => setLowStockOnly(e.target.checked)} />
-            Low stock only
-          </label>
+          <select className="shelter-filter" value={needLevelFilter} onChange={e => setNeedLevelFilter(e.target.value)}>
+            {NEED_LEVELS.map(l => <option key={l} value={l}>{l === 'All levels' ? l : l.charAt(0) + l.slice(1).toLowerCase()}</option>)}
+          </select>
         </div>
 
         {loading ? (
@@ -161,19 +162,24 @@ function InventoryTab({ shelters, resources, prefilterShelter }) {
                       <th>RESOURCE</th>
                       <th>TYPE</th>
                       <th>AVAILABLE</th>
+                      <th>REQUESTED</th>
                       <th>UNIT</th>
+                      <th>NEED LEVEL</th>
                     </tr>
                   </thead>
                   <tbody>
                     {group.items.map(item => (
-                      <tr key={item.inventory_id} className={item.low_stock ? 'low-stock-row' : ''}>
+                      <tr key={item.inventory_id}>
                         <td className="resource-cell">{item.name}</td>
                         <td><span className="type-tag">{TYPE_LABELS[item.type]}</span></td>
-                        <td>
-                          <span className={item.low_stock ? 'qty-low' : 'qty-ok'}>{item.quantity.toLocaleString()}</span>
-                          {item.low_stock && <span className="low-badge">LOW</span>}
-                        </td>
+                        <td><span className="qty-ok">{item.quantity.toLocaleString()}</span></td>
+                        <td>{item.requested.toLocaleString()}</td>
                         <td className="unit-cell">{item.unit}</td>
+                        <td>
+                          <span className="need-badge" style={{ background: `${NEED_COLORS[item.need_level]}14`, color: NEED_COLORS[item.need_level] }}>
+                            {item.need_level}
+                          </span>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -270,11 +276,11 @@ function InventoryTab({ shelters, resources, prefilterShelter }) {
   );
 }
 
-function RequestsTab({ shelters, events, volunteers }) {
+function RequestsTab({ shelters, events, volunteers, prefilterShelter }) {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('All');
-  const [shelterFilter, setShelterFilter] = useState('');
+  const [shelterFilter, setShelterFilter] = useState(prefilterShelter);
   const [eventFilter, setEventFilter] = useState('');
   const [volunteerFilter, setVolunteerFilter] = useState('');
   const [expandedRow, setExpandedRow] = useState(null);

@@ -268,21 +268,6 @@
   flex-wrap: wrap;
 }
 
-.low-stock-toggle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #374151;
-  cursor: pointer;
-}
-
-.low-stock-toggle input {
-  accent-color: #4361ee;
-  width: 16px;
-  height: 16px;
-}
 
 /* ---- Inventory groups ---- */
 
@@ -360,24 +345,12 @@
   color: #111827;
 }
 
-.qty-low {
-  font-weight: 600;
-  color: #dc2626;
-}
-
-.low-badge {
+.need-badge {
   display: inline-block;
-  margin-left: 6px;
-  padding: 1px 6px;
-  border-radius: 8px;
-  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
   font-weight: 600;
-  background: #fef2f2;
-  color: #dc2626;
-}
-
-.low-stock-row {
-  background: #fffbfb;
 }
 
 /* ---- Request table ---- */

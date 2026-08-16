@@ -1,6 +1,12 @@
 import pool from '../../../db.js';
 
-const LOW_STOCK_THRESHOLD = 50;
+function computeNeedLevel(requested, available) {
+  const ratio = requested / (available + 1);
+  if (ratio >= 2.0) return 'CRITICAL';
+  if (ratio >= 1.5) return 'HIGH';
+  if (ratio >= 1.0) return 'MODERATE';
+  return 'LOW';
+}
 
 async function getOrgId() {
   const { rows } = await pool.query(
@@ -9,15 +15,23 @@ async function getOrgId() {
   return rows[0]?.org_id;
 }
 
-export async function getInventory({ shelter, type, lowStock } = {}) {
+export async function getInventory({ shelter, type, needLevel } = {}) {
   const params = [];
   let query = `
     SELECT s.shelter_id, s.name AS shelter_name,
       r.resource_id, r.type, r.name AS resource_name, r.unit,
-      inv.inventory_id, inv.quantity_available
+      inv.inventory_id, inv.quantity_available,
+      COALESCE(req.total_requested, 0) AS total_requested
     FROM Inventory inv
     JOIN Shelter s ON inv.shelter_id = s.shelter_id
     JOIN Resource r ON inv.resource_id = r.resource_id
+    LEFT JOIN (
+      SELECT rri.resource_id, rr.shelter_id, SUM(rri.quantity) AS total_requested
+      FROM ResourceRequestItem rri
+      JOIN ResourceRequest rr ON rri.request_id = rr.request_id
+      WHERE rr.status IN ('PENDING', 'APPROVED')
+      GROUP BY rri.resource_id, rr.shelter_id
+    ) req ON req.resource_id = inv.resource_id AND req.shelter_id = inv.shelter_id
     WHERE s.status = 'OPEN'
   `;
   if (shelter) {
@@ -27,10 +41,6 @@ export async function getInventory({ shelter, type, lowStock } = {}) {
   if (type) {
     params.push(type);
     query += ` AND r.type = $${params.length}`;
-  }
-  if (lowStock === 'true') {
-    params.push(LOW_STOCK_THRESHOLD);
-    query += ` AND inv.quantity_available < $${params.length}`;
   }
   query += ` ORDER BY s.name, r.type, r.name`;
 
@@ -43,6 +53,9 @@ export async function getInventory({ shelter, type, lowStock } = {}) {
       current = { shelter_id: row.shelter_id, shelter_name: row.shelter_name, items: [] };
       grouped.push(current);
     }
+    const requested = parseInt(row.total_requested);
+    const level = computeNeedLevel(requested, row.quantity_available);
+    if (needLevel && level !== needLevel) continue;
     current.items.push({
       inventory_id: row.inventory_id,
       resource_id: row.resource_id,
@@ -50,10 +63,11 @@ export async function getInventory({ shelter, type, lowStock } = {}) {
       name: row.resource_name,
       unit: row.unit,
       quantity: row.quantity_available,
-      low_stock: row.quantity_available < LOW_STOCK_THRESHOLD,
+      requested,
+      need_level: level,
     });
   }
-  return grouped;
+  return grouped.filter(g => g.items.length > 0);
 }
 
 export async function getResources() {

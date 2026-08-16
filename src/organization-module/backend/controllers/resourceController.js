@@ -2,8 +2,8 @@ import * as resourceService from '../services/resourceService.js';
 
 export async function getInventory(req, res) {
   try {
-    const { shelter, type, lowStock } = req.query;
-    const data = await resourceService.getInventory({ shelter, type, lowStock });
+    const { shelter, type, needLevel } = req.query;
+    const data = await resourceService.getInventory({ shelter, type, needLevel });
     res.json(data);
   } catch (err) {
     console.error('Error fetching inventory:', err);

@@ -9,6 +9,9 @@ const pool = new pg.Pool({
   database: env.DBNAME,
   user: env.USER,
   password: env.PASSWORD,
+  ssl: {
+        rejectUnauthorized: false
+  }
 });
 
 async function insertRows(client, table, columns, rows, returning = null) {

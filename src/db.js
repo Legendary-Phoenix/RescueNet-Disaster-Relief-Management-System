@@ -1,14 +1,14 @@
 import pg from 'pg';
-import dotenv from 'dotenv';
-
-const env = dotenv.config().parsed;
 
 const pool = new pg.Pool({
-  host: env.DBHOST,
-  port: parseInt(env.DBPORT),
-  database: env.DBNAME,
-  user: env.USER,
-  password: env.PASSWORD,
+    host: process.env.DBHOST,
+    port: parseInt(process.env.DBPORT),
+    database: process.env.DBNAME,
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 export default pool;
